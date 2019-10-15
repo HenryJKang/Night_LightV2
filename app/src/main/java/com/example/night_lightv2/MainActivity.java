@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void onClickMap(View view){
-        startActivity(new Intent(this, displayMap.class));
+        startActivity(new Intent(this, MapsActivity.class));
     }
     public void onClickReport(View view){
         startActivity(new Intent(this, Report.class));
