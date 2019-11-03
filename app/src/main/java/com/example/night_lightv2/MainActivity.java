@@ -8,10 +8,13 @@ import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        String[] url = {"https://seung2613.github.io/street-lighting-poles/street-lighting-poles.json", "get"};
+        new myAsyncTask().execute(url);
     }
 
     public void onClickMap(View view){
