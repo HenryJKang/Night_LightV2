@@ -2,6 +2,9 @@ package com.example.night_lightv2;
 
 import androidx.fragment.app.FragmentActivity;
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -9,7 +12,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -42,7 +47,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        int counter = 0;
+        try {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            boolean success = mMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            this, R.raw.map));
+
+            if (!success) {
+                Log.e("MapsActivityRaw", "Style parsing failed.");
+            }
+        } catch (Resources.NotFoundException e) {
+            Log.e("MapsActivityRaw", "Can't find style.", e);
+        }
+
 //        for (int i = 0; i < 20; i++){
 //
 //              Log.d("jggghhhg", "      "+myAsyncTask.coordinatesArr.get(i+1)[0]);
@@ -51,14 +69,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //
 //
 //        }
-        while (counter < 2000){
-            if ( null!= myAsyncTask.coordinatesArr.get(counter+2) ||  null !=myAsyncTask.coordinatesArr.get(counter+2)  ){
+        for (int i = 0; i < myAsyncTask.coordinatesArr.size(); i++){
+                if ( null!= myAsyncTask.coordinatesArr.get(i)   && (i %25) == 0){
                   //  myAsyncTask.coordinatesArr.get(counter+2)[1] != null ||  myAsyncTask.coordinatesArr.get(counter+2)[0] != null){
-                LatLng asd = new LatLng(myAsyncTask.coordinatesArr.get(counter+2)[1], myAsyncTask.coordinatesArr.get(counter+2)[0]);
-                mMap.addMarker(new MarkerOptions().position(asd).title("marker: " + counter++));
-                counter++;
+                LatLng asd = new LatLng(myAsyncTask.coordinatesArr.get(i)[1], myAsyncTask.coordinatesArr.get(i)[0]);
+                    int height = 35;
+                    int width = 35;
+                    BitmapDrawable bitmapdraw=(BitmapDrawable)getResources().getDrawable(R.drawable.bulb);
+                    Bitmap b=bitmapdraw.getBitmap();
+                    Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
+                MarkerOptions marker = new MarkerOptions().position(asd).title("marker: " + i);
+                marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
+                mMap.addMarker(marker);
             } else{
-                counter ++;
             }
 
 
