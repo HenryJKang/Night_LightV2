@@ -5,8 +5,12 @@ import androidx.fragment.app.FragmentActivity;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -17,7 +21,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -88,10 +94,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         LatLng BCIT = new LatLng(49.251370, -123.002656);
         mMap.addMarker(new MarkerOptions().position(BCIT).title("Marker in BCIT"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(BCIT));
     }
+
+    public void onZoom(View v) {
+        if (v.getId() == R.id.btnZoomIn)
+            mMap.animateCamera(CameraUpdateFactory.zoomIn());
+        else
+            mMap.animateCamera(CameraUpdateFactory.zoomOut());
+    }
+
 }

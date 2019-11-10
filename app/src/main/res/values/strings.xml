@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">Night_LightV2</string>
     <string name="title_activity_maps">Map</string>
+    <string name="search">Search</string>
+    <string name="mapType">Toggle Type</string>
+    <string name="zoomIn">+</string>
+    <string name="zoomOut">-</string>
+    <string name="custom">Custom Map</string>
+    <string name="current_location">Current Location</string>
+
 </resources>
