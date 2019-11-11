@@ -1,12 +1,20 @@
 package com.example.night_lightv2;
 
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -76,7 +84,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //
 //        }
         for (int i = 0; i < myAsyncTask.coordinatesArr.size(); i++){
-                if ( null!= myAsyncTask.coordinatesArr.get(i)   && (i %25) == 0){
+                if ( null!= myAsyncTask.coordinatesArr.get(i)   && (i %1) == 0){
                   //  myAsyncTask.coordinatesArr.get(counter+2)[1] != null ||  myAsyncTask.coordinatesArr.get(counter+2)[0] != null){
                 LatLng asd = new LatLng(myAsyncTask.coordinatesArr.get(i)[1], myAsyncTask.coordinatesArr.get(i)[0]);
                     int height = 35;
@@ -96,7 +104,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add a marker in Sydney and move the camera
         LatLng BCIT = new LatLng(49.251370, -123.002656);
         mMap.addMarker(new MarkerOptions().position(BCIT).title("Marker in BCIT"));
+       mMap.moveCamera( CameraUpdateFactory.zoomTo( 15.0f ) );
+
         mMap.moveCamera(CameraUpdateFactory.newLatLng(BCIT));
+
+        //###
+//        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+//                .findFragmentById(R.id.map);
+//        mapFragment.getMapAsync(this);
+    //###
     }
 
     public void onZoom(View v) {
@@ -106,4 +122,62 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.animateCamera(CameraUpdateFactory.zoomOut());
     }
 
+    public void onCurrentLocation(View v) {
+        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        String locationProvider = LocationManager.NETWORK_PROVIDER;
+
+        if(checkLocationPermission()){
+
+                Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
+                System.out.println("Latitude ~~~~~~~ "+lastKnownLocation.getLatitude());
+                System.out.println("Longitidue ~~~~~~~~~~" + lastKnownLocation.getLongitude());
+        }
+
+        LocationListener locationListener = new LocationListener() {
+            public void onLocationChanged(Location location) {
+                // Called when a new location is found by the network location provider.
+                Log.d("new location lat ",Double.toString(location.getLatitude()));
+                Log.d("new location long ",Double.toString(location.getLongitude()));
+
+            }
+
+            public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+            public void onProviderEnabled(String provider) {}
+
+            public void onProviderDisabled(String provider) {}
+        };
+
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+
+    }
+
+    //###
+    public boolean checkLocationPermission()
+    {
+
+        String permission = "android.permission.ACCESS_FINE_LOCATION";
+        int res = this.checkCallingOrSelfPermission(permission);
+        return (res == PackageManager.PERMISSION_GRANTED);
+    }
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+
+                return;
+            }
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
 }
