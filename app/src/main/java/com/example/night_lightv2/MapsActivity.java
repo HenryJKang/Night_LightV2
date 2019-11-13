@@ -17,9 +17,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -108,11 +110,128 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add a marker in Sydney and move the camera
         LatLng BCIT = new LatLng(49.251370, -123.002656);
         mMap.addMarker(new MarkerOptions().position(BCIT).title("Marker in BCIT"));
-       mMap.moveCamera( CameraUpdateFactory.zoomTo( 15.0f ) );
+        mMap.moveCamera( CameraUpdateFactory.zoomTo( 15.0f ) );
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(BCIT));
 
 
+
+
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BCIT, 6));
+    }
+
+
+    public void onZoom(View v) {
+        if (v.getId() == R.id.btnZoomIn)
+            mMap.animateCamera(CameraUpdateFactory.zoomIn());
+        else
+            mMap.animateCamera(CameraUpdateFactory.zoomOut());
+    }
+    public double[] getCurrentLocation(){
+        double[] xy =new double[2];
+        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        String locationProvider = LocationManager.NETWORK_PROVIDER;
+
+        if(checkLocationPermission()){
+
+            Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
+       //     System.out.println("Latitude ~~~~~~~ "+lastKnownLocation.getLatitude());
+            xy[0] = lastKnownLocation.getLatitude();
+            xy[1] = lastKnownLocation.getLongitude();
+          //  System.out.println("Longitidue ~~~~~~~~~~" + lastKnownLocation.getLongitude());
+        } else{
+            Toast toast = Toast.makeText(getApplicationContext(),
+                    "Location not given permissions Please go to your settings and allow enable location sharing",
+                    Toast.LENGTH_SHORT);
+
+            toast.show();        }
+
+        LocationListener locationListener = new LocationListener() {
+            public void onLocationChanged(Location location) {
+                // Called when a new location is found by the network location provider.
+                Log.d("new location lat ",Double.toString(location.getLatitude()));
+                Log.d("new location long ",Double.toString(location.getLongitude()));
+
+            }
+
+            public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+            public void onProviderEnabled(String provider) {}
+
+            public void onProviderDisabled(String provider) {}
+        };
+
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        return xy;
+    }
+
+    public void onCurrentLocation(View v) {
+      System.out.println("USER LOCATION \t x:  " +  getCurrentLocation()[0] + "\t y:" + getCurrentLocation()[1]);
+    }
+
+    //###
+    public boolean checkLocationPermission()
+    {
+
+        String permission = "android.permission.ACCESS_FINE_LOCATION";
+        int res = this.checkCallingOrSelfPermission(permission);
+        return (res == PackageManager.PERMISSION_GRANTED);
+    }
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+
+                return;
+            }
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
+    public void onSearch(View v) {
+        List<Address> addressList = null;
+
+        EditText editTextLocation = (EditText) findViewById(R.id.editTextLocation);
+        String location = editTextLocation.getText().toString().trim();
+        if (TextUtils.isEmpty(location)) {
+            Toast.makeText(this, "You must enter a location.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+            Geocoder geocoder = new Geocoder(this);
+            try {
+                addressList = geocoder.getFromLocationName(location, 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Address adr = addressList.get(0);
+            LatLng latLng = new LatLng(adr.getLatitude(), adr.getLongitude());
+
+            mMap.clear();
+            mMap.addMarker(new MarkerOptions().position(latLng).title(location));
+            double[] dest = {adr.getLatitude(), adr.getLongitude()};
+            getCurrentLocation();
+            drawRoute(getCurrentLocation(),dest);
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+
+
+    }
+    public void drawRoute(double[] origin, double[] destination){
+        String o = origin[0] + ", " + origin[1];
+        String d = destination[0] + ", " + destination[1];
         //Define list to get all latlng for the route
         List<LatLng> path = new ArrayList();
         //Execute Directions API request
@@ -120,7 +239,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .apiKey("AIzaSyDZ9Tbo5lu86ZVcCDkdBVBWLuJU_P7JuLQ")
                 .build();
         //From YVR airport to BCIT-----------------------------
-        DirectionsApiRequest req = DirectionsApi.getDirections(context, "49.192879,-123.160660", "49.251370,-123.002656");
+        DirectionsApiRequest req = DirectionsApi.getDirections(context, o, d);
         try {
             DirectionsResult res = req.await();
 
@@ -170,102 +289,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             PolylineOptions opts = new PolylineOptions().addAll(path).color(Color.RED).width(5);
             mMap.addPolyline(opts);
         }
-
-        mMap.getUiSettings().setZoomControlsEnabled(true);
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BCIT, 6));
     }
 
-
-    public void onZoom(View v) {
-        if (v.getId() == R.id.btnZoomIn)
-            mMap.animateCamera(CameraUpdateFactory.zoomIn());
-        else
-            mMap.animateCamera(CameraUpdateFactory.zoomOut());
-    }
-
-
-    public void onCurrentLocation(View v) {
-        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
-        String locationProvider = LocationManager.NETWORK_PROVIDER;
-
-        if(checkLocationPermission()){
-
-                Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
-                System.out.println("Latitude ~~~~~~~ "+lastKnownLocation.getLatitude());
-                System.out.println("Longitidue ~~~~~~~~~~" + lastKnownLocation.getLongitude());
-        }
-
-        LocationListener locationListener = new LocationListener() {
-            public void onLocationChanged(Location location) {
-                // Called when a new location is found by the network location provider.
-                Log.d("new location lat ",Double.toString(location.getLatitude()));
-                Log.d("new location long ",Double.toString(location.getLongitude()));
-
-            }
-
-            public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-            public void onProviderEnabled(String provider) {}
-
-            public void onProviderDisabled(String provider) {}
-        };
-
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-
-    }
-
-    //###
-    public boolean checkLocationPermission()
-    {
-
-        String permission = "android.permission.ACCESS_FINE_LOCATION";
-        int res = this.checkCallingOrSelfPermission(permission);
-        return (res == PackageManager.PERMISSION_GRANTED);
-    }
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case 1: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-
-                return;
-            }
-            // other 'case' lines to check for other
-            // permissions this app might request
-        }
-    }
-
-    public void onSearch(View v) {
-        List<Address> addressList = null;
-
-        EditText editTextLocation = (EditText) findViewById(R.id.editTextLocation);
-        String location = editTextLocation.getText().toString();
-
-        if (location != null && location != "") {
-            Geocoder geocoder = new Geocoder(this);
-            try {
-                addressList = geocoder.getFromLocationName(location, 1);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            Address adr = addressList.get(0);
-            LatLng latLng = new LatLng(adr.getLatitude(), adr.getLongitude());
-            mMap.clear();
-            mMap.addMarker(new MarkerOptions().position(latLng).title(location));
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-
-        }
-    }
 
 }
 
