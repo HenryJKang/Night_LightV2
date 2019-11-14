@@ -101,17 +101,33 @@ public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
 //for android assignment--------------------------------------
             JSONArray myObj = jsonObject.getJSONArray("items");
             coordinatesArr = new ArrayList<>();
+            double xMin = 200.0;
+            double xMax = -200.0;
+            double yMin = 400.0;
+            double yMax = -500.0;
             for (int i=0; i<myObj.length(); i++){
                 JSONObject getobj = myObj.getJSONObject(i);
                 JSONObject fields = getobj.getJSONObject("fields");
                 JSONObject geom = fields.getJSONObject("geom");
                 JSONArray coord = geom.getJSONArray("coordinates");
-                double[] coor = {(double)coord.get(0), (double)coord.get(1)};
-
+                double[] coor = {(double)coord.get(1), (double)coord.get(0)};
+                if(xMin >= coor[0]){
+                    xMin = coor[0];
+                }
+                if(yMin >= coor[1]){
+                    yMin = coor[1];
+                }
+                if(xMax <= coor[0]){
+                    xMax = coor[0];
+                }
+                if(yMax <= coor[1]){
+                    yMax = coor[1];
+                }
                 coordinatesArr.add(coor);
             }
-            Log.d("Coordinates arr ", Arrays.toString(coordinatesArr.toArray()));
-
+            Log.d("Coordinates earr ", Arrays.toString(coordinatesArr.toArray()));
+            System.out.println("\n\n\nxMin" + xMin +"\t" + "xMax" + xMax);
+            System.out.println("yMin" + yMin + "\t" + "yMax" + yMax+"\n\n\n");
 
             Log.d("heyeyeyeyeyey arr ", ""+coordinatesArr.get(0)[0] +" "+coordinatesArr.get(0)[1]);
 
