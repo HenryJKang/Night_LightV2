@@ -4,6 +4,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,6 +26,8 @@ import java.util.List;
 public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
     //<params, progress, result>
     public static ArrayList<double[]> coordinatesArr;
+    public static MainActivity ma;
+    public static boolean status = false;
 
     private String makeServiceCall(String reqUrl) {
         String response = null;
@@ -77,6 +81,7 @@ public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
         try {
 
 
+
             JSONObject jsonObject = new JSONObject(jsonStr);
 
 
@@ -93,7 +98,6 @@ public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
 
     @Override
     protected void onPostExecute(JSONObject jsonObject) {
-//            TextView tv = findViewById(R.id.txtView);
 
         try {
 
@@ -112,8 +116,9 @@ public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
             }
             Log.d("Coordinates arr ", Arrays.toString(coordinatesArr.toArray()));
 
-
-            Log.d("heyeyeyeyeyey arr ", ""+coordinatesArr.get(0)[0] +" "+coordinatesArr.get(0)[1]);
+            status = true;
+            Log.d("Loading finished", "It actuall finished");
+            ma.pb.setVisibility(View.INVISIBLE);
 
 
 
@@ -123,6 +128,10 @@ public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
             e.printStackTrace();
         }
 
+    }
+
+    public boolean getLoadingStatus(){
+        return status;
     }
 
 
