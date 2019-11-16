@@ -5,7 +5,6 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -20,6 +19,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -32,6 +32,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
@@ -47,10 +48,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
-
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback{
+    DirectionsRoute route;
+    List<LatLng> path = new ArrayList<>();
     private GoogleMap mMap;
     private int bulbSize = 35;
+    private int counter = 0;
+    List<DirectionsRoute> myRoutes = new ArrayList<>();
+    private int routesLen;
+
+    List<Polyline> polylines = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +67,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        Button button = findViewById(R.id.altBtn);
+
+
+        button.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                for(Polyline line : polylines)
+                {
+                    line.remove();
+                    polylines.remove(line);
+                }
+                polylines.clear();
+                mMap.clear();
+                path.clear();
+                if (routesLen > 1) {
+
+                    if (counter < routesLen-1) {
+                        DirectionsRoute route = myRoutes.get(++counter);
+                        Log.e("drawing ...route ",Integer.toString(counter));
+                        drawPolyline(route);
+                    } else {
+                        counter = 0;
+                        DirectionsRoute route = myRoutes.get(counter);
+                        Log.e("drawing ...route ",Integer.toString(counter));
+                        drawPolyline(route);
+                    }
+
+                } else {
+                    //TODO: make toast "no alternative route available"
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            "No alternative route available",
+                            Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            }
+        });
+
     }
 
 
@@ -89,25 +135,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.e("MapsActivityRaw", "Can't find style.", e);
         }
 
-        double [] currloc = {49.255681, -123.062841};
+        double[] currloc = {49.255681, -123.062841};
 
         System.out.println("outside double for loop ");
 
-          addLights(currloc, 0.005);
+        addLights(currloc, 0.005);
         // Add a marker in Sydney and move the camera
         LatLng BCIT = new LatLng(49.251370, -123.002656);
         mMap.addMarker(new MarkerOptions().position(BCIT).title("Marker in BCIT"));
-        mMap.moveCamera( CameraUpdateFactory.zoomTo( 15.0f ) );
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(15.0f));
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(BCIT));
-
 
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BCIT, 6));
     }
-    public void addLights(double[] currloc, double range){
+
+    public void addLights(double[] currloc, double range) {
         for (int i = 0; i < myAsyncTask.coordinatesArr.size(); i++) {
             //   for (int i = 0; i < 111; i++) {
 
@@ -117,7 +163,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //addBulbToMap( myAsyncTask.coordinatesArr.get(i)[1], myAsyncTask.coordinatesArr.get(i)[0]);
 
                 if (checkRange(currloc[0] - range, currloc[0] + range,
-                        currloc[1] - range , currloc[1] + range, myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1])){
+                        currloc[1] - range, currloc[1] + range, myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1])) {
 
                     addBulbToMap(myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1]);
                 }
@@ -126,7 +172,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
     }
-    public void addLights(double[] source, double[] dest, double range){
+
+    public void addLights(double[] source, double[] dest, double range) {
         for (int i = 0; i < myAsyncTask.coordinatesArr.size(); i++) {
             //   for (int i = 0; i < 111; i++) {
 
@@ -135,8 +182,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 //addBulbToMap( myAsyncTask.coordinatesArr.get(i)[1], myAsyncTask.coordinatesArr.get(i)[0]);
 
-                if (checkRange(Math.min(source[0], dest[0]) - range, Math.max(source[0], dest[0]) + range ,Math.min(source[1], dest[1]) - range , Math.max(source[1], dest[1]) + range,
-                        myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1])){
+                if (checkRange(Math.min(source[0], dest[0]) - range, Math.max(source[0], dest[0]) + range, Math.min(source[1], dest[1]) - range, Math.max(source[1], dest[1]) + range,
+                        myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1])) {
 
                     addBulbToMap(myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1]);
                 }
@@ -145,8 +192,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
     }
-    public void addBulbToMap( double x, double y){
-        LatLng loc = new LatLng(x , y);
+
+    public void addBulbToMap(double x, double y) {
+        LatLng loc = new LatLng(x, y);
         int height = bulbSize;
         int width = bulbSize;
         BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.bulb);
@@ -164,50 +212,52 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.animateCamera(CameraUpdateFactory.zoomOut());
     }
 
-    public double[] getCurrentLocation(){
-        double[] xy =new double[2];
-        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+    public double[] getCurrentLocation() {
+        double[] xy = new double[2];
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
         String locationProvider = LocationManager.NETWORK_PROVIDER;
 
-        if(checkLocationPermission()){
+        if (checkLocationPermission()) {
 
             Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
-       //     System.out.println("Latitude ~~~~~~~ "+lastKnownLocation.getLatitude());
+            //     System.out.println("Latitude ~~~~~~~ "+lastKnownLocation.getLatitude());
             xy[0] = lastKnownLocation.getLatitude();
             xy[1] = lastKnownLocation.getLongitude();
-          //  System.out.println(       "Longitidue ~~~~~~~~~~" + lastKnownLocation.getLongitude());
-        } else{
+            //  System.out.println(       "Longitidue ~~~~~~~~~~" + lastKnownLocation.getLongitude());
+        } else {
             Toast toast = Toast.makeText(getApplicationContext(),
                     "Location not given permissions Please go to your settings and allow enable location sharing",
                     Toast.LENGTH_SHORT);
-            toast.show();        }
+            toast.show();
+        }
         LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
                 // Called when a new location is found by the network location provider.
-                Log.d("new location lat ",Double.toString(location.getLatitude()));
-                Log.d("new location long ",Double.toString(location.getLongitude()));
+                Log.d("new location lat ", Double.toString(location.getLatitude()));
+                Log.d("new location long ", Double.toString(location.getLongitude()));
 
             }
-            public void onStatusChanged(String provider, int status, Bundle extras) {}
 
-            public void onProviderEnabled(String provider) {}
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
 
-            public void onProviderDisabled(String provider) {}
+            public void onProviderEnabled(String provider) {
+            }
+
+            public void onProviderDisabled(String provider) {
+            }
         };
 
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         return xy;
     }
-//    public void setLightsFromXtoY(GoogleMap gMap, double startX, double startY, double destX, double destY ){
-//        if(checkRange(Math.min(startX, destX), Math.max(startX, destX), Math.min(startY, destY), Math.max(startY, destY), destX, targetY)){
-//            addBulbToMap(targetX, targetY);
-//        }
-//    }
-    public boolean checkRange(double xMin, double xMax, double yMin, double yMax, double checkX, double checkY){
-   // System.out.println("============xmin" + xMin + "xmax" + xMax + "check" + checkX);
-        if( xMin <= checkX  && checkX <= xMax && yMin <= checkY && checkY <= yMax ){
+
+
+    public boolean checkRange(double xMin, double xMax, double yMin, double yMax, double checkX, double checkY) {
+        // System.out.println("============xmin" + xMin + "xmax" + xMax + "check" + checkX);
+        if (xMin <= checkX && checkX <= xMax && yMin <= checkY && checkY <= yMax) {
             System.out.println("True");
             return true;
         }
@@ -215,12 +265,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return false;
 
     }
+
     public void onCurrentLocation(View v) {
-      System.out.println("USER LOCATION \t x:  " +  getCurrentLocation()[0] + "\t y:" + getCurrentLocation()[1]);
-      addBulbToMap(getCurrentLocation()[0], getCurrentLocation()[1]);
-      addBulbToMap(49.200526595816854    , -123.170110
-      );
-      addBulbToMap(49.200526, -123.170110);
+        System.out.println("USER LOCATION \t x:  " + getCurrentLocation()[0] + "\t y:" + getCurrentLocation()[1]);
+        addBulbToMap(getCurrentLocation()[0], getCurrentLocation()[1]);
+        addBulbToMap(49.200526595816854, -123.170110
+        );
+        addBulbToMap(49.200526, -123.170110);
         addBulbToMap(49.20052, -123.170110);
         addBulbToMap(49.20054, -123.170110);
 
@@ -230,13 +281,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     //###
-    public boolean checkLocationPermission()
-    {
+    public boolean checkLocationPermission() {
 
         String permission = "android.permission.ACCESS_FINE_LOCATION";
         int res = this.checkCallingOrSelfPermission(permission);
         return (res == PackageManager.PERMISSION_GRANTED);
     }
+
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case 1: {
@@ -266,97 +317,122 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
 
-            Geocoder geocoder = new Geocoder(this);
-            try {
-                addressList = geocoder.getFromLocationName(location, 1) ;
-                if (addressList.size() == 0){
-                    Toast.makeText(this, "Not applicable address.", Toast.LENGTH_LONG).show();
-                    return;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+        Geocoder geocoder = new Geocoder(this);
+        try {
+            addressList = geocoder.getFromLocationName(location, 1);
+            if (addressList.size() == 0) {
+                Toast.makeText(this, "Not applicable address.", Toast.LENGTH_LONG).show();
+                return;
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-            Address adr = addressList.get(0);
+        Address adr = addressList.get(0);
 
-            LatLng latLng = new LatLng(adr.getLatitude(), adr.getLongitude());
+        LatLng latLng = new LatLng(adr.getLatitude(), adr.getLongitude());
 
-            mMap.clear();
-            mMap.addMarker(new MarkerOptions().position(latLng).title(location));
-            double[] dest = {adr.getLatitude(), adr.getLongitude()};
-       //     getCurrentLocation();
-            drawRoute(getCurrentLocation(),dest);
-         //   addLights(getCurrentLocation(), dest, 0.002);
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(latLng).title(location));
+        double[] dest = {adr.getLatitude(), adr.getLongitude()};
+        //     getCurrentLocation();
+        drawRoute(getCurrentLocation(), dest);
+        //   addLights(getCurrentLocation(), dest, 0.002);
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
 
 
     }
-    public void drawRoute(double[] origin, double[] destination){
+
+    public void drawRoute(double[] origin, double[] destination) {
+
         String o = origin[0] + ", " + origin[1];
         String d = destination[0] + ", " + destination[1];
         //Define list to get all latlng for the route
-        List<LatLng> path = new ArrayList();
+
+
         //Execute Directions API request
         GeoApiContext context = new GeoApiContext.Builder()
                 .apiKey("AIzaSyDZ9Tbo5lu86ZVcCDkdBVBWLuJU_P7JuLQ")
                 .build();
         //From YVR airport to BCIT-----------------------------
-       // DirectionsApiRequest req = DirectionsApi.getDirections(context, o, d);
-        DirectionsApiRequest req = DirectionsApi.newRequest(context).origin(o).destination(d).mode(TravelMode.WALKING);
+        // DirectionsApiRequest req = DirectionsApi.getDirections(context, o, d);
+        DirectionsApiRequest req = DirectionsApi.newRequest(context).origin(o).destination(d).mode(TravelMode.WALKING).alternatives(true);
         try {
             DirectionsResult res = req.await();
 
             //Loop through legs and steps to get encoded polylines of each step
-            if (res.routes != null && res.routes.length > 0) {
+            routesLen = res.routes.length;
+
+            if (res.routes != null && routesLen > 0) {
+                Log.d("routesLen---", Integer.toString(routesLen));
                 DirectionsRoute route = res.routes[0];
 
-                if (route.legs != null) {
-                    for (int i = 0; i < route.legs.length; i++) {
-                        DirectionsLeg leg = route.legs[i];
-                        if (leg.steps != null) {
-                            for (int j = 0; j < leg.steps.length; j++) {
-                                DirectionsStep step = leg.steps[j];
-                                if (step.steps != null && step.steps.length > 0) {
-                                    for (int k = 0; k < step.steps.length; k++) {
-                                        DirectionsStep step1 = step.steps[k];
-                                        EncodedPolyline points1 = step1.polyline;
-                                        if (points1 != null) {
-                                            //Decode polyline and add points to list of route coordinates
-                                            List<com.google.maps.model.LatLng> coords1 = points1.decodePath();
-                                            for (com.google.maps.model.LatLng coord1 : coords1) {
-                                                path.add(new LatLng(coord1.lat, coord1.lng));
-                                            }
-                                        }
+                for (int i = 0; i < routesLen; i++) {
+                    myRoutes.add(res.routes[i]);
+                }
+
+
+                Log.e("drawing ...route",Integer.toString(0));
+                drawPolyline(route);
+
+
+            }
+        } catch (Exception ex) {
+            Log.e("getLocalizedMessage()", ex.getLocalizedMessage());
+        }
+
+
+        for (LatLng point : path) {
+            addBulbToMap(point.latitude, point.longitude);
+            System.out.println(point.latitude + ":::::" + point.longitude);
+        }
+
+    }
+
+    public void drawPolyline(DirectionsRoute route) {
+//        polyline.remove();
+//        mMap.clear();
+
+
+        if (route.legs != null) {
+            for (int i = 0; i < route.legs.length; i++) {
+                DirectionsLeg leg = route.legs[i];
+                if (leg.steps != null) {
+                    for (int j = 0; j < leg.steps.length; j++) {
+                        DirectionsStep step = leg.steps[j];
+                        if (step.steps != null && step.steps.length > 0) {
+                            for (int k = 0; k < step.steps.length; k++) {
+                                DirectionsStep step1 = step.steps[k];
+                                EncodedPolyline points1 = step1.polyline;
+                                if (points1 != null) {
+                                    //Decode polyline and add points to list of route coordinates
+                                    List<com.google.maps.model.LatLng> coords1 = points1.decodePath();
+                                    for (com.google.maps.model.LatLng coord1 : coords1) {
+                                        path.add(new LatLng(coord1.lat, coord1.lng));
                                     }
-                                } else {
-                                    EncodedPolyline points = step.polyline;
-                                    if (points != null) {
-                                        //Decode polyline and add points to list of route coordinates
-                                        List<com.google.maps.model.LatLng> coords = points.decodePath();
-                                        for (com.google.maps.model.LatLng coord : coords) {
-                                            path.add(new LatLng(coord.lat, coord.lng));
-                                        }
-                                    }
+                                }
+                            }
+                        } else {
+                            EncodedPolyline points = step.polyline;
+                            if (points != null) {
+                                //Decode polyline and add points to list of route coordinates
+                                List<com.google.maps.model.LatLng> coords = points.decodePath();
+                                for (com.google.maps.model.LatLng coord : coords) {
+                                    path.add(new LatLng(coord.lat, coord.lng));
                                 }
                             }
                         }
                     }
                 }
             }
-        } catch (Exception ex) {
-            Log.e("getLocalizedMessage()", ex.getLocalizedMessage());
         }
 
-        //Draw the polyline
         if (path.size() > 0) {
-            PolylineOptions opts = new PolylineOptions().addAll(path).color(Color.RED).width(5);
-            mMap.addPolyline(opts);
-        }
-        for (LatLng point :  path){
-            addBulbToMap(point.latitude, point.longitude);
-            System.out.println( point.latitude+ ":::::"+point.longitude );
-        }
 
+            PolylineOptions opts = new PolylineOptions().addAll(path).color(Color.RED).width(5);
+            polylines.add(this.mMap.addPolyline(opts));
+
+        }
     }
 
 
