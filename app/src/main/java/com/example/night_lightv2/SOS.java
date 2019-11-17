@@ -32,7 +32,10 @@ public class SOS extends AppCompatActivity {
         (findViewById(R.id.sosSend)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                //https://www.google.com/maps/dir/?api=1&origin=&destination="Destination"
+                //https://www.google.com/maps/dir/?api=1&origin=&destination="Destination"
+                //https://www.google.com/maps/dir/?api=1&origin=&destination="Destination"
+                //https://www.google.com/maps/dir/?api=1&origin=&destination="Destination"
 //                LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
                 //---insert here

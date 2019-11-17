@@ -49,7 +49,7 @@ import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private GoogleMap mMap;
+    private static GoogleMap mMap;
     private int bulbSize = 35;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +59,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
     }
 
 
@@ -105,7 +106,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BCIT, 6));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BCIT, 6));
+        mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(getCurrentLocation()[0],getCurrentLocation()[1]) , 14.0f) );
     }
     public void addLights(double[] currloc, double range){
         for (int i = 0; i < myAsyncTask.coordinatesArr.size(); i++) {
@@ -215,7 +217,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return false;
 
     }
-    public void onCurrentLocation(View v) {
+    public void onTestbtn(View v) {
+        //This is for you Rose to test some codes out.
       System.out.println("USER LOCATION \t x:  " +  getCurrentLocation()[0] + "\t y:" + getCurrentLocation()[1]);
       addBulbToMap(getCurrentLocation()[0], getCurrentLocation()[1]);
       addBulbToMap(49.200526595816854    , -123.170110
@@ -227,6 +230,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //       LatLng BCIT = new LatLng(49.200526, -123.224110);
         //mMap.addMarker(new MarkerOptions().position(BCIT).title("Marker in BCIT"));
         //addBulbToMap(49.2005265, -123.2241106);
+    }
+    public void onCurrentLocation(View v) {
+        mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(getCurrentLocation()[0],getCurrentLocation()[1]) , 14.0f) );
     }
 
     //###
