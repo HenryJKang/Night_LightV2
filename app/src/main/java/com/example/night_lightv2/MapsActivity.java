@@ -80,7 +80,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     polylines.remove(line);
                 }
                 polylines.clear();
-                mMap.clear();
+
                 path.clear();
                 if (routesLen > 1) {
 
