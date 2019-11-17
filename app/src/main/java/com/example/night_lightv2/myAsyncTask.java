@@ -26,7 +26,6 @@ import java.util.List;
 public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
     //<params, progress, result>
 
-    public static ArrayList<double[]> coordinatesArr;
     public static MainActivity ma;
     public static boolean status = false;
     public static Lamps lamps;
@@ -107,10 +106,7 @@ public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
 //for android assignment--------------------------------------
             JSONArray myObj = jsonObject.getJSONArray("items");
             lamps = new Lamps();
-            double xMin = 200.0;
-            double xMax = -200.0;
-            double yMin = 400.0;
-            double yMax = -500.0;
+
             for (int i=0; i<myObj.length(); i++){
                 JSONObject getobj = myObj.getJSONObject(i);
                 JSONObject fields = getobj.getJSONObject("fields");
@@ -119,24 +115,11 @@ public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
                 double[] coor = {(double)coord.get(1), (double)coord.get(0)};
                 lamps.addLamp(coor[0], coor[1]);
 
-                if(xMin >= coor[0]){
-                    xMin = coor[0];
-                }
-                if(yMin >= coor[1]){
-                    yMin = coor[1];
-                }
-                if(xMax <= coor[0]){
-                    xMax = coor[0];
-                }
-                if(yMax <= coor[1]){
-                    yMax = coor[1];
-                }
-              //  lamps.add(coor);
+
             }
 
             status = true;
             ma.pb.setVisibility(View.INVISIBLE);
-            lamps.addLamp( 49.23588, -123.03337);
             System.out.println(lamps.print());
 
         } catch (Exception e) {

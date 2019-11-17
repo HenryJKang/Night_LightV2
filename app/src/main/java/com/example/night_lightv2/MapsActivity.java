@@ -46,7 +46,10 @@ import com.google.maps.model.TravelMode;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback{
     DirectionsRoute route;
@@ -155,9 +158,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BCIT, 6));
     }
 
+
     public void addLights(double[] currloc, int range){
         System.out.println("help");
-        ArrayList<LampValue> list = myAsyncTask.lamps.getSurroundingLamps(currloc[0], currloc[1], range);
+        HashSet<LampValue> list = myAsyncTask.lamps.getSurroundingLamps(currloc[0], currloc[1], range);
+        for (LampValue lampval : list){
+            addBulbToMap(lampval.getX(), lampval.getY());
+
+        }
+
+
+    }
+    public void addLights(LampValue lamp, int range){
+        addBulbToMap(lamp.getX(), lamp.getY());
+    }
+    public void addLights(HashSet<LampKey> route, int range){
+        System.out.println("help");
+        HashSet<LampValue> list = myAsyncTask.lamps.getSurroundingLamps(route, 3);
+
+
         for (LampValue lampval : list){
             addBulbToMap(lampval.getX(), lampval.getY());
 
@@ -167,7 +186,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     public void addLights(double x, double y, int range){
         System.out.println("help");
-        ArrayList<LampValue> list = myAsyncTask.lamps.getSurroundingLamps(x, y, range);
+        HashSet<LampValue> list = myAsyncTask.lamps.getSurroundingLamps(x, y, range);
         for (LampValue lampval : list){
             addBulbToMap(lampval.getX(), lampval.getY());
 
@@ -175,8 +194,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     }
-
-//    public void addLights(double[] source, double[] dest, double range){
+    //    public void addLights(double[] source, double[] dest, double range){
 //        for (int i = 0; i < myAsyncTask.coordinatesArr.size(); i++) {
 //            //   for (int i = 0; i < 111; i++) {
 //
@@ -206,6 +224,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
         mMap.addMarker(marker);
     }
+
 
     public void onZoom(View v) {
         if (v.getId() == R.id.btnZoomIn)
@@ -384,11 +403,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
 
-        for (LatLng point : path) {
-            addBulbToMap(point.latitude, point.longitude);
-            System.out.println(point.latitude + ":::::" + point.longitude);
-        }
+        showLampsOnRoute();
 
+    }
+    public void showLampsOnRoute(){
+        HashSet<LampKey> lamplist= myAsyncTask.lamps.getLampsOnRoute(path, 3);
+        HashSet<LampValue> lampValueList = myAsyncTask.lamps.getSurroundingLamps(lamplist,3);
+        for (LampValue lamp : lampValueList ){
+            // addBulbToMap(point.latitude, point.longitude);a
+            addLights(lamp,3);
+            //  addAll();
+            // addBulbToMap(point.latitude, point.longitude);
+            //   System.out.println( point.latitude+ ":::::"+point.longitude );
+        }
     }
 
     public void drawPolyline(DirectionsRoute route) {
@@ -435,14 +462,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             polylines.add(this.mMap.addPolyline(opts));
         }
-        for (LatLng point :  path){
-           // addBulbToMap(point.latitude, point.longitude);a
-            addLights(point.latitude, point.longitude, 3);
-            System.out.println( point.latitude+ ":::::"+point.longitude );
-        }
 
-        }
+        showLampsOnRoute();
     }
+
+}
+
 
 
 
