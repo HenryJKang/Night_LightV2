@@ -25,8 +25,9 @@ import java.util.List;
 
 public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
     //<params, progress, result>
-    public static Lamps lamps;
-
+    public static ArrayList<double[]> coordinatesArr;
+    public static MainActivity ma;
+    public static boolean status = false;
 
     private String makeServiceCall(String reqUrl) {
         String response = null;
@@ -103,7 +104,7 @@ public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
 
 //for android assignment--------------------------------------
             JSONArray myObj = jsonObject.getJSONArray("items");
-            lamps = new Lamps();
+            coordinatesArr = new ArrayList<>();
             double xMin = 200.0;
             double xMax = -200.0;
             double yMin = 400.0;
@@ -114,8 +115,6 @@ public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
                 JSONObject geom = fields.getJSONObject("geom");
                 JSONArray coord = geom.getJSONArray("coordinates");
                 double[] coor = {(double)coord.get(1), (double)coord.get(0)};
-                lamps.addLamp(coor[0], coor[1]);
-
                 if(xMin >= coor[0]){
                     xMin = coor[0];
                 }
@@ -128,12 +127,21 @@ public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
                 if(yMax <= coor[1]){
                     yMax = coor[1];
                 }
-              //  lamps.add(coor);
+                coordinatesArr.add(coor);
             }
 
-            lamps.addLamp( 49.23588, -123.03337);
-        System.out.println(lamps.print());
-      
+            System.out.println("\n\n\nxMin" + xMin +"\t" + "xMax" + xMax);
+            System.out.println("yMin" + yMin + "\t" + "yMax" + yMax+"\n\n\n");
+
+            Log.d("heyeyeyeyeyey arr ", ""+coordinatesArr.get(0)[0] +" "+coordinatesArr.get(0)[1]);
+            status = true;
+            
+            ma.pb.setVisibility(View.INVISIBLE);
+
+
+
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
