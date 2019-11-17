@@ -4,6 +4,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,6 +26,7 @@ import java.util.List;
 public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
     //<params, progress, result>
     public static Lamps lamps;
+
 
     private String makeServiceCall(String reqUrl) {
         String response = null;
@@ -77,6 +80,7 @@ public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
         try {
 
 
+
             JSONObject jsonObject = new JSONObject(jsonStr);
 
 
@@ -93,7 +97,6 @@ public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
 
     @Override
     protected void onPostExecute(JSONObject jsonObject) {
-//            TextView tv = findViewById(R.id.txtView);
 
         try {
 
@@ -130,20 +133,15 @@ public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
 
             lamps.addLamp( 49.23588, -123.03337);
         System.out.println(lamps.print());
-        //    Log.d("Coordinates earr ", Arrays.toString(coordinatesArr.toArray()));
-//            System.out.println("\n\n\nxMin" + xMin +"\t" + "xMax" + xMax);
-//            System.out.println("yMin" + yMin + "\t" + "yMax" + yMax+"\n\n\n");
-
-         //   Log.d("heyeyeyeyeyey arr ", ""+coordinatesArr.get(0)[0] +" "+coordinatesArr.get(0)[1]);
-
-
-
-
-
+      
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    public boolean getLoadingStatus(){
+        return status;
     }
 
 
