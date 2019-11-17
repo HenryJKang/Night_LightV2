@@ -174,7 +174,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     public void addLights(HashSet<LampKey> route, int range){
         System.out.println("help");
-        HashSet<LampValue> list = myAsyncTask.lamps.getSurroundingLamps(route, 3);
+        HashSet<LampValue> list = myAsyncTask.lamps.getSurroundingLamps(route, 2);
 
 
         for (LampValue lampval : list){

@@ -108,8 +108,8 @@ public class Lamps {
         HashSet<LampValue> removeDup = new HashSet<>();
         //for each  key in the hashsetlist
         for (LampKey key : lampkeylist){
-            for(int i = 0 - range; i < 1 + range; i++) {
-                for (int j = 0 - range; j < 1 + range; j++) {
+            for(int i = 0 - range; i <  range; i++) {
+                for (int j = 0 - range; j < range; j++) {
 
                     //create ranged Key
                     LampKey rangedKey = new LampKey(key.getX() + (difference * i), key.getY() + (difference * j));
@@ -170,7 +170,7 @@ public class Lamps {
         double diffX = two.latitude - one.latitude;
         double diffY = two.longitude - one.longitude;
         System.out.println("151: diffX" + diffX + "diffY " + diffY + " " +( Math.abs(diffX) > Math.abs(diffY)));
-
+        double offset = .8;
         if (Math.abs(diffX) > Math.abs(diffY)){
             System.out.println("");
             double multiple =Math.abs( (diffX / ( range * difference)));
@@ -178,8 +178,8 @@ public class Lamps {
             diffY = diffY / multiple;
             System.out.println("153: diffX" + diffX + "diffY " + diffY + "multiple" + multiple);
 
-            for(int i = 1; i < multiple; i++ ){
-                LampKey key = new LampKey(one.latitude + (diffX * range  * i * 2), one.longitude + (diffY * i  * range * 2));
+            for(int i = 1; i <= multiple; i++ ){
+                LampKey key = new LampKey(one.latitude + (diffX * range  * i ), one.longitude + (diffY * i  * range * offset));
                 System.out.println("key 153");
                 list.add(key);
             }
@@ -189,8 +189,8 @@ public class Lamps {
             diffY = diffY / multiple;
             System.out.println("163: diffX" + diffX + "diffY " + diffY + "multiple" + multiple);
 
-            for(int i = 1; i < (int) Math.abs(multiple); i++ ){
-                LampKey key = new LampKey(one.latitude + (diffX * range *  2 * i), one.longitude + (diffY * 2 * i *  range));
+            for(int i = 1; i <= (int) Math.abs(multiple); i++ ){
+                LampKey key = new LampKey(one.latitude + (diffX * range * i), one.longitude + (diffY *  i *  range * offset));
                 list.add(key);
             }
 
