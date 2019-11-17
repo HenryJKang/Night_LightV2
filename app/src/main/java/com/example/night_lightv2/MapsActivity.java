@@ -139,7 +139,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         System.out.println("outside double for loop ");
 
-        addLights(currloc, 0.005);
+        addBulbToMap(49.255681, -123.062841);
+          addLights(currloc, 50);
+
         // Add a marker in Sydney and move the camera
         LatLng BCIT = new LatLng(49.251370, -123.002656);
         mMap.addMarker(new MarkerOptions().position(BCIT).title("Marker in BCIT"));
@@ -153,48 +155,48 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BCIT, 6));
     }
 
-    public void addLights(double[] currloc, double range) {
-        for (int i = 0; i < myAsyncTask.coordinatesArr.size(); i++) {
-            //   for (int i = 0; i < 111; i++) {
-
-            if (null != myAsyncTask.coordinatesArr.get(i) && (i % 1) == 0) {
-                //  myAsyncTask.coordinatesArr.get(counter+2)[1] != null ||  myAsyncTask.coordinatesArr.get(counter+2)[0] != null){
-
-                //addBulbToMap( myAsyncTask.coordinatesArr.get(i)[1], myAsyncTask.coordinatesArr.get(i)[0]);
-
-                if (checkRange(currloc[0] - range, currloc[0] + range,
-                        currloc[1] - range, currloc[1] + range, myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1])) {
-
-                    addBulbToMap(myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1]);
-                }
-            }
+    public void addLights(double[] currloc, int range){
+        System.out.println("help");
+        ArrayList<LampValue> list = myAsyncTask.lamps.getSurroundingLamps(currloc[0], currloc[1], range);
+        for (LampValue lampval : list){
+            addBulbToMap(lampval.getX(), lampval.getY());
 
         }
 
+
     }
-
-    public void addLights(double[] source, double[] dest, double range) {
-        for (int i = 0; i < myAsyncTask.coordinatesArr.size(); i++) {
-            //   for (int i = 0; i < 111; i++) {
-
-            if (null != myAsyncTask.coordinatesArr.get(i) && (i % 1) == 0) {
-                //  myAsyncTask.coordinatesArr.get(counter+2)[1] != null ||  myAsyncTask.coordinatesArr.get(counter+2)[0] != null){
-
-                //addBulbToMap( myAsyncTask.coordinatesArr.get(i)[1], myAsyncTask.coordinatesArr.get(i)[0]);
-
-                if (checkRange(Math.min(source[0], dest[0]) - range, Math.max(source[0], dest[0]) + range, Math.min(source[1], dest[1]) - range, Math.max(source[1], dest[1]) + range,
-                        myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1])) {
-
-                    addBulbToMap(myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1]);
-                }
-            }
+    public void addLights(double x, double y, int range){
+        System.out.println("help");
+        ArrayList<LampValue> list = myAsyncTask.lamps.getSurroundingLamps(x, y, range);
+        for (LampValue lampval : list){
+            addBulbToMap(lampval.getX(), lampval.getY());
 
         }
 
+
     }
 
-    public void addBulbToMap(double x, double y) {
-        LatLng loc = new LatLng(x, y);
+//    public void addLights(double[] source, double[] dest, double range){
+//        for (int i = 0; i < myAsyncTask.coordinatesArr.size(); i++) {
+//            //   for (int i = 0; i < 111; i++) {
+//
+//            if (null != myAsyncTask.coordinatesArr.get(i) && (i % 1) == 0) {
+//                //  myAsyncTask.coordinatesArr.get(counter+2)[1] != null ||  myAsyncTask.coordinatesArr.get(counter+2)[0] != null){
+//
+//                //addBulbToMap( myAsyncTask.coordinatesArr.get(i)[1], myAsyncTask.coordinatesArr.get(i)[0]);
+//
+//                if (checkRange(Math.min(source[0], dest[0]) - range, Math.max(source[0], dest[0]) + range ,Math.min(source[1], dest[1]) - range , Math.max(source[1], dest[1]) + range,
+//                        myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1])){
+//
+//                    addBulbToMap(myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1]);
+//                }
+//            }
+//
+//        }
+//
+//    }
+    public void addBulbToMap( double x, double y){
+        LatLng loc = new LatLng(x , y);
         int height = bulbSize;
         int width = bulbSize;
         BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.bulb);
@@ -430,13 +432,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (path.size() > 0) {
 
             PolylineOptions opts = new PolylineOptions().addAll(path).color(Color.RED).width(5);
+
             polylines.add(this.mMap.addPolyline(opts));
+        }
+        for (LatLng point :  path){
+           // addBulbToMap(point.latitude, point.longitude);a
+            addLights(point.latitude, point.longitude, 3);
+            System.out.println( point.latitude+ ":::::"+point.longitude );
+        }
 
         }
     }
 
 
-}
+
 
 
 
