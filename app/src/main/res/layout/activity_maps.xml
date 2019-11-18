@@ -53,13 +53,21 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:onClick="onZoom"/>
+
         <Button
+            android:id="@+id/btnCurrentLoc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/btnCurrentLoc"
-            android:text="@string/current_location"
             android:layout_gravity="center_vertical"
-            android:onClick="onCurrentLocation"/>
+            android:onClick="onCurrentLocation"
+            android:text="testBtn" />
+
+        <Button
+            android:id="@+id/currentZoom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="zoomCurrentLocation"
+            android:text="zoom Current Location" />
 
 
     </LinearLayout>
