@@ -143,7 +143,7 @@ public class Lamps {
     }
     public HashSet<LampKey> getLampsOnRoute(List<LatLng> path, int range) {
         HashSet<LampKey> list = new HashSet<>();
-        System.out.println("129");
+      //  System.out.println("129");
 
         for (int i = 0; i < path.size() -  1; i++){
             LampKey key = new LampKey(path.get(i).latitude, path.get(i).longitude);
@@ -151,7 +151,7 @@ public class Lamps {
             list.add(key);
             list.add(key1);
             if(notWithinRange(path.get(i), path.get(i + 1), range)){
-                System.out.println("130");
+              //  System.out.println("130");
                 list = getInBetweenTwoPath(path.get(i), path.get(i + 1), range, list);
             }
         }
@@ -159,35 +159,35 @@ public class Lamps {
         return list;
     }
     public boolean notWithinRange(LatLng one, LatLng two, int range){
-        System.out.println("139\t one X: "+ one.latitude + "Y:" + one.longitude);
-        System.out.println("\t two X: "+ two.latitude + "Y:" + two.longitude);
-        System.out.println("\t" + Math.abs(Math.abs(one.latitude) - Math.abs(two.latitude) + (difference * range)));
-        System.out.println("\tisitevertrue" + ( (Math.abs(Math.abs(one.latitude) - Math.abs(two.latitude))) > (difference * range * 2)) );
+//        System.out.println("139\t one X: "+ one.latitude + "Y:" + one.longitude);
+//        System.out.println("\t two X: "+ two.latitude + "Y:" + two.longitude);
+//        System.out.println("\t" + Math.abs(Math.abs(one.latitude) - Math.abs(two.latitude) + (difference * range)));
+//        System.out.println("\tisitevertrue" + ( (Math.abs(Math.abs(one.latitude) - Math.abs(two.latitude))) > (difference * range * 2)) );
         return ( ( (Math.abs(Math.abs(one.latitude) - Math.abs(two.latitude))) > (difference * range * 2)) ||
                 ( (Math.abs(Math.abs(one.longitude) - Math.abs(two.longitude))) > (difference * range * 2)));
     }
     public HashSet<LampKey> getInBetweenTwoPath(LatLng one, LatLng two, int range, HashSet<LampKey> list){
         double diffX = two.latitude - one.latitude;
         double diffY = two.longitude - one.longitude;
-        System.out.println("151: diffX" + diffX + "diffY " + diffY + " " +( Math.abs(diffX) > Math.abs(diffY)));
+     //   System.out.println("151: diffX" + diffX + "diffY " + diffY + " " +( Math.abs(diffX) > Math.abs(diffY)));
         double offset = .8;
         if (Math.abs(diffX) > Math.abs(diffY)){
-            System.out.println("");
+      //      System.out.println("");
             double multiple =Math.abs( (diffX / ( range * difference)));
             diffX = diffX / multiple;
             diffY = diffY / multiple;
-            System.out.println("153: diffX" + diffX + "diffY " + diffY + "multiple" + multiple);
+        //    System.out.println("153: diffX" + diffX + "diffY " + diffY + "multiple" + multiple);
 
             for(int i = 1; i <= multiple; i++ ){
                 LampKey key = new LampKey(one.latitude + (diffX * range  * i ), one.longitude + (diffY * i  * range * offset));
-                System.out.println("key 153");
+               // System.out.println("key 153");
                 list.add(key);
             }
         } else{
             double multiple = Math.abs( (diffY / ( range * difference)));
             diffX = diffX / multiple;
             diffY = diffY / multiple;
-            System.out.println("163: diffX" + diffX + "diffY " + diffY + "multiple" + multiple);
+  //          System.out.println("163: diffX" + diffX + "diffY " + diffY + "multiple" + multiple);
 
             for(int i = 1; i <= (int) Math.abs(multiple); i++ ){
                 LampKey key = new LampKey(one.latitude + (diffX * range * i), one.longitude + (diffY *  i *  range * offset));

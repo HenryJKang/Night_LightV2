@@ -73,42 +73,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        Button button = findViewById(R.id.altBtn);
-
-
-        button.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-                for(Polyline line : polylines)
-                {
-                    line.remove();
-                    polylines.remove(line);
-                }
-                polylines.clear();
-                mMap.clear();
-                path.clear();
-                if (routesLen > 1) {
-
-                    if (counter < routesLen-1) {
-                        DirectionsRoute route = myRoutes.get(++counter);
-                        Log.e("drawing ...route ",Integer.toString(counter));
-                        drawPolyline(route);
-                    } else {
-                        counter = 0;
-                        DirectionsRoute route = myRoutes.get(counter);
-                        Log.e("drawing ...route ",Integer.toString(counter));
-                        drawPolyline(route);
-                    }
-
-                } else {
-                    //TODO: make toast "no alternative route available"
-                    Toast toast = Toast.makeText(getApplicationContext(),
-                            "No alternative route available",
-                            Toast.LENGTH_SHORT);
-                    toast.show();
-                }
-            }
-        });
+//        Button button = findViewById(R.id.altBtn);
+//
+//
+//        button.setOnClickListener(new View.OnClickListener() {
+//
+//            public void onClick(View v) {
+//                for(Polyline line : polylines)
+//                {
+//                    line.remove();
+//                    polylines.remove(line);
+//                }
+//                polylines.clear();
+//                mMap.clear();
+//                path.clear();
+//                if (routesLen > 1) {
+//
+//                    if (counter < routesLen-1) {
+//                        DirectionsRoute route = myRoutes.get(++counter);
+//                        Log.e("drawing ...route ",Integer.toString(counter));
+//                        drawPolyline(route);
+//                    } else {
+//                        counter = 0;
+//                        DirectionsRoute route = myRoutes.get(counter);
+//                        Log.e("drawing ...route ",Integer.toString(counter));
+//                        drawPolyline(route);
+//                    }
+//
+//                } else {
+//                    //TODO: make toast "no alternative route available"
+//                    Toast toast = Toast.makeText(getApplicationContext(),
+//                            "No alternative route available",
+//                            Toast.LENGTH_SHORT);
+//                    toast.show();
+//                }
+//            }
+//        });
 
     }
 
@@ -386,6 +386,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         showRoute(addressList , location);
 
     }
+    public void altBtn(View v){
+        for(Polyline line : polylines)
+        {
+            line.remove();
+            polylines.remove(line);
+        }
+        polylines.clear();
+        mMap.clear();
+        path.clear();
+        if (routesLen > 1) {
+
+            if (counter < routesLen-1) {
+                DirectionsRoute route = myRoutes.get(++counter);
+                Log.e("drawing ...route ",Integer.toString(counter));
+                drawPolyline(route);
+            } else {
+                counter = 0;
+                DirectionsRoute route = myRoutes.get(counter);
+                Log.e("drawing ...route ",Integer.toString(counter));
+                drawPolyline(route);
+            }
+
+        } else {
+            //TODO: make toast "no alternative route available"
+            Toast toast = Toast.makeText(getApplicationContext(),
+                    "No alternative route available",
+                    Toast.LENGTH_SHORT);
+            toast.show();
+        }
+
+    }
     public void  showRoute(List<Address> addressList, String location){
         mMap.clear();
         Address adr = addressList.get(locationCounter);
@@ -407,7 +438,51 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         double differenceX = endX - startX;
         double differenceY = endY - startY;
         LatLng middleOfPath = new LatLng((differenceX / 2 ) + startX , (differenceY / 2) + startY );
-        zoomLocationAnimate(middleOfPath, 11.0f);
+        int maximum = Math.max((int) ((differenceX) * 100000), (int) ((differenceY )* 100000)) ;
+        float zoom = 10.0f;
+        System.out.println("!@#" + maximum);
+                  zoomLocationAnimate(middleOfPath, (zoom));
+
+       // zoomLocationAnimate(middleOfPath, (zoom *));
+
+//        if (maximum >= 3000){
+//            zoomLocationAnimate(middleOfPath, (zoom * (float)(2)));
+//            System.out.println("dafs414" + maximum);
+//
+//        }else if (3000 > maximum && maximum >= 2500){
+//            zoomLocationAnimate(middleOfPath, (zoom * (float)(2.5)));
+//
+//System.out.println("419");
+//        }
+//        else if (2000 > maximum && maximum >= 1800){
+//            zoomLocationAnimate(middleOfPath, (zoom * (float)(3)));
+//            System.out.println("dafs422");
+//
+//
+//        } else if (1800 > maximum && maximum >= 1600){
+//            zoomLocationAnimate(middleOfPath, (zoom * (float)(3.5)));
+//
+//            System.out.println("dafs428");
+//
+//        }
+//        else if (1600 > maximum && maximum >= 1400){
+//            zoomLocationAnimate(middleOfPath, (zoom * (float)(3.5)));
+//
+//            System.out.println("dafs434");
+//
+//        }
+//        else if (1400 > maximum && maximum >= 1000){
+//            zoomLocationAnimate(middleOfPath, zoom * 4);
+//
+//            System.out.println("dafs440");
+//
+//        } else {
+//            zoomLocationAnimate(middleOfPath, zoom * (float)4.5);
+//            System.out.println("dafs445");
+//
+//
+//        }
+
     }
 
 
