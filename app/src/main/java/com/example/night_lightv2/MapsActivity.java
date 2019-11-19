@@ -224,8 +224,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
         mMap.addMarker(marker);
     }
-
-
+//----------
+    public void addCurrentLocationToMap(double x, double y){
+        LatLng loc = new LatLng(x , y);
+        //int height = bulbSize;
+        //int width = bulbSize;
+        //BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.bulb);
+        //Bitmap b = bitmapdraw.getBitmap();
+        //Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
+        MarkerOptions marker = new MarkerOptions().position(loc).title("marker: " + x + " : " + y);
+        //marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
+        mMap.addMarker(marker);
+    }
+  //-----from henry's
     public void onZoom(View v) {
         if (v.getId() == R.id.btnZoomIn)
             mMap.animateCamera(CameraUpdateFactory.zoomIn());
@@ -301,6 +312,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //addBulbToMap(49.2005265, -123.2241106);
     }
 
+    public void zoomCurrentLocation(View v){
+        double x = getCurrentLocation()[0];
+        double y = getCurrentLocation()[1];
+        addCurrentLocationToMap(x,y);
+        mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(x,y) , 14.0f) );
+    }
     //###
     public boolean checkLocationPermission() {
 
