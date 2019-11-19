@@ -21,7 +21,6 @@ public class SOS extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sos);
-        maps = new MapsActivity();
 
         (findViewById(R.id.sosCall)).setOnClickListener(new View.OnClickListener() {
             @Override
