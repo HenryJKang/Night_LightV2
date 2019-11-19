@@ -12,7 +12,7 @@
 
         <EditText
             android:id="@+id/editTextLocation"
-            android:layout_width="326dp"
+            android:layout_width="208dp"
             android:layout_height="wrap_content" />
 
         <Button
@@ -22,9 +22,10 @@
             android:layout_gravity="right"
             android:onClick="onSearch"
             android:text="@string/search" />
+
         <TextView
             android:id="@+id/numberOfLamps"
-            android:layout_width="wrap_content"
+            android:layout_width="62dp"
             android:layout_height="match_parent">
 
         </TextView>
@@ -67,6 +68,7 @@
             android:fontFamily="@font/alegreya_sc_bold"
             android:shadowColor="#E1FFFFFF"
             android:text="Alternative route"
+            android:onClick="onAlternativePath"
             android:textColor="#111010"
             android:textSize="17sp" />
 

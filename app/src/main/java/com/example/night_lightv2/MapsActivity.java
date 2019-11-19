@@ -3,8 +3,6 @@ package com.example.night_lightv2;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
-
-
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -52,7 +50,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback{
     private GoogleMap mMap;
     private int bulbSize = 35;
@@ -61,9 +58,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     List<Polyline> polylines = new ArrayList<>();
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -72,8 +69,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
 //        Button button = findViewById(R.id.altBtn);
-//
-//
 //
 //
 //        button.setOnClickListener(new View.OnClickListener() {
@@ -233,7 +228,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
         mMap.addMarker(marker);
     }
-//----------
+    //----------
     public void addCurrentLocationToMap(double x, double y){
         LatLng loc = new LatLng(x , y);
         //int height = bulbSize;
@@ -245,9 +240,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
         mMap.addMarker(marker);
     }
-  //-----from henry's
-
-
     public double[] getCurrentLocation() {
         double[] xy = new double[2];
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -362,7 +354,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onSearch(View v) {
 
         EditText editTextLocation = (EditText) findViewById(R.id.editTextLocation);
-       String location = editTextLocation.getText().toString().trim();
+        String location = editTextLocation.getText().toString().trim();
         if (TextUtils.isEmpty(location)) {
             Toast.makeText(this, "You must enter a location.", Toast.LENGTH_LONG).show();
             return;
@@ -371,7 +363,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Geocoder geocoder = new Geocoder(this);
         List<Address> addressList = new ArrayList<>();
         try {
-             addressList = geocoder.getFromLocationName(location, 1);
+            addressList = geocoder.getFromLocationName(location, 1);
             if (addressList.size() == 0) {
                 Toast.makeText(this, "Not applicable address.", Toast.LENGTH_LONG).show();
                 return;
@@ -430,7 +422,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-//    public void onAlternativePath(View v){
+    //    public void onAlternativePath(View v){
 //        for(Polyline line : polylines)
 //        {
 //            line.remove();
@@ -461,9 +453,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        }
 //
 //    }
-public void onAlternativePath(View v){
-            routesHolder.updateToNextRoute();
-            addRouteToMap();
+    public void onAlternativePath(View v){
+        routesHolder.updateToNextRoute();
+        addRouteToMap();
 
     }
     //** oLD ONALTERNATIVE PATH
@@ -519,7 +511,7 @@ public void onAlternativePath(View v){
 //        System.out.println("!@#" + maximum);
 //                  zoomLocationAnimate(middleOfPath, (zoom));
 
-       // zoomLocationAnimate(middleOfPath, (zoom *));
+    // zoomLocationAnimate(middleOfPath, (zoom *));
 
 //        if (maximum >= 3000){
 //            zoomLocationAnimate(middleOfPath, (zoom * (float)(2)));
@@ -641,6 +633,7 @@ public void onAlternativePath(View v){
             polylines.add(this.mMap.addPolyline(opts));
         }
     }
+
 }
 
 
