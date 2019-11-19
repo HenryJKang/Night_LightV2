@@ -3,6 +3,8 @@ package com.example.night_lightv2;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+
+
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -52,6 +54,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback{
     DirectionsRoute route;
     List<LatLng> path = new ArrayList<>();
@@ -64,8 +67,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     List<Polyline> polylines = new ArrayList<>();
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -73,42 +78,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-//        Button button = findViewById(R.id.altBtn);
-//
-//
-//        button.setOnClickListener(new View.OnClickListener() {
-//
-//            public void onClick(View v) {
-//                for(Polyline line : polylines)
-//                {
-//                    line.remove();
-//                    polylines.remove(line);
-//                }
-//                polylines.clear();
-//                mMap.clear();
-//                path.clear();
-//                if (routesLen > 1) {
-//
-//                    if (counter < routesLen-1) {
-//                        DirectionsRoute route = myRoutes.get(++counter);
-//                        Log.e("drawing ...route ",Integer.toString(counter));
-//                        drawPolyline(route);
-//                    } else {
-//                        counter = 0;
-//                        DirectionsRoute route = myRoutes.get(counter);
-//                        Log.e("drawing ...route ",Integer.toString(counter));
-//                        drawPolyline(route);
-//                    }
-//
-//                } else {
-//                    //TODO: make toast "no alternative route available"
-//                    Toast toast = Toast.makeText(getApplicationContext(),
-//                            "No alternative route available",
-//                            Toast.LENGTH_SHORT);
-//                    toast.show();
-//                }
-//            }
-//        });
+        Button button = findViewById(R.id.altBtn);
+
+
+
+
+        button.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                for(Polyline line : polylines)
+                {
+                    line.remove();
+                    polylines.remove(line);
+                }
+                polylines.clear();
+                mMap.clear();
+                path.clear();
+                if (routesLen > 1) {
+
+                    if (counter < routesLen-1) {
+                        DirectionsRoute route = myRoutes.get(++counter);
+                        Log.e("drawing ...route ",Integer.toString(counter));
+                        drawPolyline(route);
+                    } else {
+                        counter = 0;
+                        DirectionsRoute route = myRoutes.get(counter);
+                        Log.e("drawing ...route ",Integer.toString(counter));
+                        drawPolyline(route);
+                    }
+
+                } else {
+                    //TODO: make toast "no alternative route available"
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            "No alternative route available",
+                            Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            }
+        });
 
     }
 
@@ -575,7 +582,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             polylines.add(this.mMap.addPolyline(opts));
         }
     }
-
 }
 
 
