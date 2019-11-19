@@ -15,6 +15,12 @@
             android:layout_width="200dp"
             android:layout_height="wrap_content" />
 
+        <fragment android:id="@+id/autocomplete_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+            />
+
         <Button
             android:id="@+id/btnSearch"
             android:layout_width="wrap_content"
@@ -53,14 +59,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:onClick="onZoom"/>
-
-        <Button
-            android:id="@+id/btnCurrentLoc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:onClick="onCurrentLocation"
-            android:text="testBtn" />
 
         <Button
             android:id="@+id/currentZoom"
