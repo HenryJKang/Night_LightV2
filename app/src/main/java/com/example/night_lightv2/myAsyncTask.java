@@ -118,6 +118,23 @@ public class myAsyncTask extends AsyncTask<String, Void, JSONObject> {
 
             }
 
+            //DEMO PURPOSES
+            int size = 10;
+            double move = 0.005;
+            double startX = 49.25440 + move;
+            double endX = 49.24337;
+            double startY = -123.02353 + 2 * move;
+            double endY = -123.00001 +  2 * move;
+            double differenceX = (endX - startX )/ (double) size;
+            double differenceY = (endY - startY )/ (double) size;
+            int counter = 0;
+            for (int i = 0; i < size; i++){
+                for (int j = 0; j < size; j++){
+                    lamps.addLamp(startX + (differenceX * i), startY + (differenceY * j));
+                }
+            }
+
+            //END OF DEMO PURPOSES.
             status = true;
             ma.pb.setVisibility(View.INVISIBLE);
             System.out.println(lamps.print());

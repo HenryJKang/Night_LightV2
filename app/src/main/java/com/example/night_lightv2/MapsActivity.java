@@ -23,6 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 
@@ -57,6 +58,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private int bulbSize = 35;
     private int counter = 0;
+    int locationCounter;
     List<DirectionsRoute> myRoutes = new ArrayList<>();
     private int routesLen;
 
@@ -112,21 +114,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
+     * The first loading screen.
+     * Shows user current location
+     * The surrounding light bulbs around the user
+     * Zoomed into current location too
+     * @param googleMap
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        double range = 0.005;
         mMap = googleMap;
+        // Customise the styling of the base map using a JSON object defined
+        // in a raw resource file.
         try {
-            // Customise the styling of the base map using a JSON object defined
-            // in a raw resource file.
+
             boolean success = mMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(
                             this, R.raw.map));
@@ -137,27 +137,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (Resources.NotFoundException e) {
             Log.e("MapsActivityRaw", "Can't find style.", e);
         }
-
-        double[] currloc = {49.255681, -123.062841};
-
-        System.out.println("outside double for loop ");
-
-        addBulbToMap(49.255681, -123.062841);
-          addLights(currloc, 50);
+        double[] currentLocation = getCurrentLocation();
 
         // Add a marker in Sydney and move the camera
-        LatLng BCIT = new LatLng(49.251370, -123.002656);
-        mMap.addMarker(new MarkerOptions().position(BCIT).title("Marker in BCIT"));
-        mMap.moveCamera(CameraUpdateFactory.zoomTo(15.0f));
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(BCIT));
 
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BCIT, 6));
+        showCurrentLocation();
     }
+    void showCurrentLocation(){
+        //pre setting icon size
+        int width = 50;
+        int height = 50;
+        int rangeAroundCurrentLocation = 200;
 
+        //getting Current location
+        double[] currentLocation = getCurrentLocation();
+        addLights(currentLocation, rangeAroundCurrentLocation);
+
+        //adding marker
+        BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.curloc);
+        Bitmap b = bitmapdraw.getBitmap();
+        Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
+        LatLng loc = new LatLng(currentLocation[0] ,currentLocation[1]);
+        MarkerOptions marker = new MarkerOptions().position(loc).title("Your Location:" + " x: " + currentLocation[0] + " y: " + currentLocation[1]);
+        marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
+        mMap.addMarker(marker);
+        //zooming
+        zoomLocation(currentLocation, 14.0f);
+
+    }
 
     public void addLights(double[] currloc, int range){
         System.out.println("help");
@@ -312,11 +321,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //addBulbToMap(49.2005265, -123.2241106);
     }
 
-    public void zoomCurrentLocation(View v){
+    public void zoomLocation(View v) {
         double x = getCurrentLocation()[0];
         double y = getCurrentLocation()[1];
-        addCurrentLocationToMap(x,y);
-        mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(x,y) , 14.0f) );
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(x, y), 14.0f));
+    }
+
+
+    public void zoomLocation(double[] loc, float zoomLocation){
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc[0], loc[1]), zoomLocation));
+    }
+
+    public void zoomLocationAnimate(LatLng loc, float zoomLocation){
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.latitude, loc.longitude), zoomLocation));
+
     }
     //###
     public boolean checkLocationPermission() {
@@ -346,8 +364,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void onSearch(View v) {
+        locationCounter = 0;
         List<Address> addressList = null;
-
         EditText editTextLocation = (EditText) findViewById(R.id.editTextLocation);
         String location = editTextLocation.getText().toString().trim();
         if (TextUtils.isEmpty(location)) {
@@ -365,11 +383,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (IOException e) {
             e.printStackTrace();
         }
+        showRoute(addressList , location);
 
-        Address adr = addressList.get(0);
-
+    }
+    public void  showRoute(List<Address> addressList, String location){
+        mMap.clear();
+        Address adr = addressList.get(locationCounter);
         LatLng latLng = new LatLng(adr.getLatitude(), adr.getLongitude());
-
         mMap.clear();
         mMap.addMarker(new MarkerOptions().position(latLng).title(location));
         double[] dest = {adr.getLatitude(), adr.getLongitude()};
@@ -377,9 +397,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         drawRoute(getCurrentLocation(), dest);
         //   addLights(getCurrentLocation(), dest, 0.002);
         mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+        showLampsOnRoute();
 
-
+        //gettting path logic for zooming
+        double startX =  path.get(0).latitude;
+        double startY = path.get(1).longitude;
+        double endX = path.get(path.size()-1).latitude;
+        double endY = path.get(path.size()-1).longitude;
+        double differenceX = endX - startX;
+        double differenceY = endY - startY;
+        LatLng middleOfPath = new LatLng((differenceX / 2 ) + startX , (differenceY / 2) + startY );
+        zoomLocationAnimate(middleOfPath, 11.0f);
     }
+
 
     public void drawRoute(double[] origin, double[] destination) {
 
@@ -419,27 +449,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.e("getLocalizedMessage()", ex.getLocalizedMessage());
         }
 
-
-        showLampsOnRoute();
-
     }
     public void showLampsOnRoute(){
         HashSet<LampKey> lamplist= myAsyncTask.lamps.getLampsOnRoute(path, 3);
         HashSet<LampValue> lampValueList = myAsyncTask.lamps.getSurroundingLamps(lamplist,3);
         for (LampValue lamp : lampValueList ){
-            // addBulbToMap(point.latitude, point.longitude);a
             addLights(lamp,3);
-            //  addAll();
-            // addBulbToMap(point.latitude, point.longitude);
-            //   System.out.println( point.latitude+ ":::::"+point.longitude );
+
         }
     }
 
     public void drawPolyline(DirectionsRoute route) {
-//        polyline.remove();
-//        mMap.clear();
-
-
         if (route.legs != null) {
             for (int i = 0; i < route.legs.length; i++) {
                 DirectionsLeg leg = route.legs[i];
@@ -479,8 +499,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             polylines.add(this.mMap.addPolyline(opts));
         }
-
-        showLampsOnRoute();
     }
 
 }
