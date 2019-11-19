@@ -33,7 +33,6 @@ public class RoutesHolder {
     int noOfLampsInCurrentRoute;
     List<LatLng> latLngArrayOfCurrentRoute;
     public RoutesHolder(String loc, double[] origin, Address adr){
-        currentRouteCounter = 0;
         this.destination[0] = adr.getLatitude();
         this.destination[1] = adr.getLongitude();
         this.location = loc;
@@ -60,8 +59,8 @@ public class RoutesHolder {
         } catch (Exception ex) {
             Log.e("getLocalizedMessage()", ex.getLocalizedMessage());
         }
-
-        currentRoute = this.directionResults.routes[0];
+        setCurrentRouteToBrightest();
+        currentRoute = this.directionResults.routes[currentRouteCounter];
         noOfLampsInCurrentRoute = getNoOfLampsInRoute(currentRoute);
         latLngArrayOfCurrentRoute = getLatLngArrayOfRoute(currentRoute);
     }
@@ -117,5 +116,19 @@ public class RoutesHolder {
         }
         return path;
     }
+    public void setCurrentRouteToBrightest(){
+        int max = 0;
+        int keepTrack = 0;
+        for (int i = 0; i < noOfDiffRoutes; i++) {
+            System.out.println(getNoOfLampsInRoute(directionResults.routes[i] )+ "!@#!@#!@#");
 
+           if (max < getNoOfLampsInRoute(directionResults.routes[i])) {
+               System.out.println(max);
+               max = getNoOfLampsInRoute(directionResults.routes[i]);
+               keepTrack = i;
+
+           }
+        }
+        currentRouteCounter = keepTrack;
+    }
 }

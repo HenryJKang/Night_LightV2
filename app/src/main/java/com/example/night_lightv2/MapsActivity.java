@@ -20,6 +20,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -55,6 +56,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     RoutesHolder routesHolder;
 
     List<Polyline> polylines = new ArrayList<>();
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -382,6 +385,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     public void addRouteToMap(){
         mMap.clear();
+        TextView noOfLamps = findViewById(R.id.numberOfLamps);
+        noOfLamps.setText("");
         LatLng latLng = new LatLng(routesHolder.destination[0], routesHolder.destination[1]);
         mMap.addMarker(new MarkerOptions().position(latLng).title(routesHolder.location));
         drawPolyline(routesHolder.currentRoute);
@@ -389,7 +394,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         float zoom = 10.0f;
         zoomLocationAnimate(getMiddleOfPath(routesHolder.origin, routesHolder.destination),
                 (getZoomFloat(routesHolder.origin, routesHolder.destination)));
-
+        noOfLamps.setText("" + routesHolder.noOfLampsInCurrentRoute);
     }
 
     public LatLng getMiddleOfPath(double[] origin, double[] destination){

@@ -22,6 +22,13 @@
             android:layout_gravity="right"
             android:onClick="onSearch"
             android:text="@string/search" />
+        <TextView
+            android:id="@+id/numberOfLamps"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+        </TextView>
+
 
     </LinearLayout>
 
@@ -77,7 +84,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="onAlternativePath"
-
         android:text="Alternative route" />
 
 </LinearLayout>
