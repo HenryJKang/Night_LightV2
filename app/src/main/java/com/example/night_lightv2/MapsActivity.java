@@ -64,7 +64,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     DirectionsRoute route;
     PlacesClient placesClient;
     List<LatLng> path = new ArrayList<>();
-    private GoogleMap mMap;
+    static GoogleMap mMap;
     private int bulbSize = 35;
     private int counter = 0;
     List<DirectionsRoute> myRoutes = new ArrayList<>();
@@ -87,10 +87,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         // Create a new Places client instance
         placesClient = Places.createClient(this);
-        Button button = findViewById(R.id.altBtn);
+
+        Button altBtn = findViewById(R.id.altBtn);
 
 
-        button.setOnClickListener(new View.OnClickListener() {
+        altBtn.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
                 for (Polyline line : polylines) {
@@ -123,25 +124,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        // Initialize the AutocompleteSupportFragment.
-        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
-                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
-
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
-                // TODO: Get info about the selected place.
-                Log.i("Places--", "Place: " + place.getName() + ", " + place.getId());
-            }
-
-            @Override
-            public void onError(Status status) {
-                // TODO: Handle the error.
-                Log.i("Places Err--", "An error occurred: " + status);
-            }
-        });
     }
 
                 /**
@@ -155,6 +138,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                  */
         @Override
         public void onMapReady (GoogleMap googleMap){
+            final Geocoder geocoder = new Geocoder(this);
             double range = 0.005;
             mMap = googleMap;
             try {
@@ -189,6 +173,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.getUiSettings().setZoomControlsEnabled(true);
 
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BCIT, 6));
+
+
+
+            // Initialize the AutocompleteSupportFragment.
+            AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+            autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
+
+            autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+                @Override
+                public void onPlaceSelected(Place place) {
+                    // TODO: Get info about the selected place.
+                    Log.i("Places--", "Place: " + place.getName() + ", " + place.getId());
+                    List<Address> addressList = null;
+                    String location = place.getName();
+                    try {
+                        addressList = geocoder.getFromLocationName(location, 1);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Address adr = addressList.get(0);
+
+                    LatLng latLng = new LatLng(adr.getLatitude(), adr.getLongitude());
+                    
+                    mMap.clear();
+                    mMap.addMarker(new MarkerOptions().position(latLng).title(location));
+                    double[] dest = {adr.getLatitude(), adr.getLongitude()};
+                    drawRoute(getCurrentLocation(), dest);
+                    mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+
+                }
+
+                @Override
+                public void onError(Status status) {
+                    // TODO: Handle the error.
+                    Log.i("Places Err--", "An error occurred: " + status);
+                }
+            });
         }
 
 
@@ -227,25 +250,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         }
-        //    public void addLights(double[] source, double[] dest, double range){
-//        for (int i = 0; i < myAsyncTask.coordinatesArr.size(); i++) {
-//            //   for (int i = 0; i < 111; i++) {
-//
-//            if (null != myAsyncTask.coordinatesArr.get(i) && (i % 1) == 0) {
-//                //  myAsyncTask.coordinatesArr.get(counter+2)[1] != null ||  myAsyncTask.coordinatesArr.get(counter+2)[0] != null){
-//
-//                //addBulbToMap( myAsyncTask.coordinatesArr.get(i)[1], myAsyncTask.coordinatesArr.get(i)[0]);
-//
-//                if (checkRange(Math.min(source[0], dest[0]) - range, Math.max(source[0], dest[0]) + range ,Math.min(source[1], dest[1]) - range , Math.max(source[1], dest[1]) + range,
-//                        myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1])){
-//
-//                    addBulbToMap(myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1]);
-//                }
-//            }
-//
-//        }
-//
-//    }
+
         public void addBulbToMap ( double x, double y){
             LatLng loc = new LatLng(x, y);
             int height = bulbSize;
@@ -380,41 +385,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
-        public void onSearch (View v){
-            List<Address> addressList = null;
 
-            EditText editTextLocation = (EditText) findViewById(R.id.editTextLocation);
-            String location = editTextLocation.getText().toString().trim();
-            if (TextUtils.isEmpty(location)) {
-                Toast.makeText(this, "You must enter a location.", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            Geocoder geocoder = new Geocoder(this);
-            try {
-                addressList = geocoder.getFromLocationName(location, 1);
-                if (addressList.size() == 0) {
-                    Toast.makeText(this, "Not applicable address.", Toast.LENGTH_LONG).show();
-                    return;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            Address adr = addressList.get(0);
-
-            LatLng latLng = new LatLng(adr.getLatitude(), adr.getLongitude());
-
-            mMap.clear();
-            mMap.addMarker(new MarkerOptions().position(latLng).title(location));
-            double[] dest = {adr.getLatitude(), adr.getLongitude()};
-            //     getCurrentLocation();
-            drawRoute(getCurrentLocation(), dest);
-            //   addLights(getCurrentLocation(), dest, 0.002);
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-
-
-        }
 
         public void drawRoute ( double[] origin, double[] destination){
 
