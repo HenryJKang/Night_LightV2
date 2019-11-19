@@ -3,9 +3,21 @@ package com.example.night_lightv2;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import java.util.Arrays;
+
+import com.google.android.gms.common.api.Status;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+
+import static com.example.night_lightv2.myAsyncTask.status;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -50,7 +62,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback{
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+    PlacesClient placesClient;
+    static final private String API_KEY = "AIzaSyDZ9Tbo5lu86ZVcCDkdBVBWLuJU_P7JuLQ";
     private GoogleMap mMap;
     private int bulbSize = 35;
     RoutesHolder routesHolder;
@@ -58,15 +72,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     List<Polyline> polylines = new ArrayList<>();
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
+        // Initialize the SDK
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), API_KEY);
+        }
+        // Create a new Places client instance
+        placesClient = Places.createClient(this);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
+    }
 
 //        Button button = findViewById(R.id.altBtn);
 //
@@ -105,7 +129,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //            }
 //        });
 
-    }
+//    }
 
 
     /**
@@ -113,11 +137,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * Shows user current location
      * The surrounding light bulbs around the user
      * Zoomed into current location too
+     *
      * @param googleMap
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        final Geocoder geocoder = new Geocoder(this);
         // Customise the styling of the base map using a JSON object defined
         // in a raw resource file.
         try {
@@ -139,8 +165,50 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
         showCurrentLocation();
+
+
+        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+// TODO: Get info about the selected place.
+                Log.i("Places--", "Place: " + place.getName() + ", " + place.getId());
+                List<Address> addressList = null;
+                String location = place.getName();
+                try {
+                    addressList = geocoder.getFromLocationName(location, 1);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Address adr = addressList.get(0);
+
+                LatLng latLng = new LatLng(adr.getLatitude(), adr.getLongitude());
+
+                mMap.clear();
+                mMap.addMarker(new MarkerOptions().position(latLng).title(location));
+                double[] dest = {adr.getLatitude(), adr.getLongitude()};
+
+//                drawRoute(getCurrentLocation(), dest);
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+
+                routesHolder = new RoutesHolder(location, getCurrentLocation(), addressList.get(0));
+                addRouteToMap();
+            }
+
+            @Override
+            public void onError(Status status) {
+                Log.i("Places Err--", "An error occurred: " + status);
+            }
+        });
+
+
     }
-    void showCurrentLocation(){
+
+    void showCurrentLocation() {
         //pre setting icon size
         int width = 50;
         int height = 50;
@@ -154,7 +222,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.curloc);
         Bitmap b = bitmapdraw.getBitmap();
         Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
-        LatLng loc = new LatLng(currentLocation[0] ,currentLocation[1]);
+        LatLng loc = new LatLng(currentLocation[0], currentLocation[1]);
         MarkerOptions marker = new MarkerOptions().position(loc).title("Your Location:" + " x: " + currentLocation[0] + " y: " + currentLocation[1]);
         marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
         mMap.addMarker(marker);
@@ -163,41 +231,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    public void addLights(double[] currloc, int range){
+    public void addLights(double[] currloc, int range) {
         System.out.println("help");
         HashSet<LampValue> list = myAsyncTask.lamps.getSurroundingLamps(currloc[0], currloc[1], range);
-        for (LampValue lampval : list){
+        for (LampValue lampval : list) {
             addBulbToMap(lampval.getX(), lampval.getY());
 
         }
 
 
     }
-    public void addLights(LampValue lamp, int range){
+
+    public void addLights(LampValue lamp, int range) {
         addBulbToMap(lamp.getX(), lamp.getY());
     }
-    public void addLights(HashSet<LampKey> route, int range){
+
+    public void addLights(HashSet<LampKey> route, int range) {
         System.out.println("help");
         HashSet<LampValue> list = myAsyncTask.lamps.getSurroundingLamps(route, 2);
 
 
-        for (LampValue lampval : list){
+        for (LampValue lampval : list) {
             addBulbToMap(lampval.getX(), lampval.getY());
 
         }
 
 
     }
-    public void addLights(double x, double y, int range){
+
+    public void addLights(double x, double y, int range) {
         System.out.println("help");
         HashSet<LampValue> list = myAsyncTask.lamps.getSurroundingLamps(x, y, range);
-        for (LampValue lampval : list){
+        for (LampValue lampval : list) {
             addBulbToMap(lampval.getX(), lampval.getY());
 
         }
 
 
     }
+
     //    public void addLights(double[] source, double[] dest, double range){
 //        for (int i = 0; i < myAsyncTask.coordinatesArr.size(); i++) {
 //            //   for (int i = 0; i < 111; i++) {
@@ -217,8 +289,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        }
 //
 //    }
-    public void addBulbToMap( double x, double y){
-        LatLng loc = new LatLng(x , y);
+    public void addBulbToMap(double x, double y) {
+        LatLng loc = new LatLng(x, y);
         int height = bulbSize;
         int width = bulbSize;
         BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.bulb);
@@ -228,9 +300,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
         mMap.addMarker(marker);
     }
+
     //----------
-    public void addCurrentLocationToMap(double x, double y){
-        LatLng loc = new LatLng(x , y);
+    public void addCurrentLocationToMap(double x, double y) {
+        LatLng loc = new LatLng(x, y);
         //int height = bulbSize;
         //int width = bulbSize;
         //BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.bulb);
@@ -240,6 +313,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
         mMap.addMarker(marker);
     }
+
     public double[] getCurrentLocation() {
         double[] xy = new double[2];
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -316,14 +390,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    public void zoomLocation(double[] loc, float zoomLocation){
+    public void zoomLocation(double[] loc, float zoomLocation) {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc[0], loc[1]), zoomLocation));
     }
 
-    public void zoomLocationAnimate(LatLng loc, float zoomLocation){
+    public void zoomLocationAnimate(LatLng loc, float zoomLocation) {
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.latitude, loc.longitude), zoomLocation));
 
     }
+
     //###
     public boolean checkLocationPermission() {
 
@@ -351,31 +426,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    public void onSearch(View v) {
 
-        EditText editTextLocation = (EditText) findViewById(R.id.editTextLocation);
-        String location = editTextLocation.getText().toString().trim();
-        if (TextUtils.isEmpty(location)) {
-            Toast.makeText(this, "You must enter a location.", Toast.LENGTH_LONG).show();
-            return;
-        }
 
-        Geocoder geocoder = new Geocoder(this);
-        List<Address> addressList = new ArrayList<>();
-        try {
-            addressList = geocoder.getFromLocationName(location, 1);
-            if (addressList.size() == 0) {
-                Toast.makeText(this, "Not applicable address.", Toast.LENGTH_LONG).show();
-                return;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        routesHolder = new RoutesHolder(location , getCurrentLocation(), addressList.get(0));
-        addRouteToMap();
-
-    }
-    public void addRouteToMap(){
+    public void addRouteToMap() {
         mMap.clear();
         TextView noOfLamps = findViewById(R.id.numberOfLamps);
         noOfLamps.setText("");
@@ -389,36 +442,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         noOfLamps.setText("" + routesHolder.noOfLampsInCurrentRoute);
     }
 
-    public LatLng getMiddleOfPath(double[] origin, double[] destination){
+    public LatLng getMiddleOfPath(double[] origin, double[] destination) {
         //gettting path logic for zooming
-        double startX =  origin[0];
+        double startX = origin[0];
         double startY = origin[1];
         double endX = destination[0];
         double endY = destination[1];
         double differenceX = endX - startX;
         double differenceY = endY - startY;
-        LatLng middleOfPath = new LatLng((differenceX / 2 ) + startX , (differenceY / 2) + startY );
+        LatLng middleOfPath = new LatLng((differenceX / 2) + startX, (differenceY / 2) + startY);
         return middleOfPath;
 
     }
-    public float getZoomFloat(double[] origin, double[] destination){
-        double startX =  origin[0];
+
+    public float getZoomFloat(double[] origin, double[] destination) {
+        double startX = origin[0];
         double startY = destination[0];
         double endX = origin[1];
         double endY = destination[1];
         double differenceX = endX - startX;
         double differenceY = endY - startY;
-        int maximum = Math.max((int) ((differenceX) * 100000), (int) ((differenceY )* 100000)) ;
+        int maximum = Math.max((int) ((differenceX) * 100000), (int) ((differenceY) * 100000));
         float zoom = 10.0f;
         System.out.println("!@#" + maximum);
         return 10.0f;
     }
 
-    public void drawBulbsOnRoute(List<LatLng> path){
-        HashSet<LampKey> lamplist= myAsyncTask.lamps.getLampsOnRoute(path, 3);
-        HashSet<LampValue> lampValueList = myAsyncTask.lamps.getSurroundingLamps(lamplist,3);
-        for (LampValue lamp : lampValueList ){
-            addLights(lamp,3);
+    public void drawBulbsOnRoute(List<LatLng> path) {
+        HashSet<LampKey> lamplist = myAsyncTask.lamps.getLampsOnRoute(path, 3);
+        HashSet<LampValue> lampValueList = myAsyncTask.lamps.getSurroundingLamps(lamplist, 3);
+        for (LampValue lamp : lampValueList) {
+            addLights(lamp, 3);
         }
     }
 
@@ -453,7 +507,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        }
 //
 //    }
-    public void onAlternativePath(View v){
+    public void onAlternativePath(View v) {
         routesHolder.updateToNextRoute();
         addRouteToMap();
 

@@ -10,18 +10,13 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/editTextLocation"
-            android:layout_width="208dp"
-            android:layout_height="wrap_content" />
 
-        <Button
-            android:id="@+id/btnSearch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:onClick="onSearch"
-            android:text="@string/search" />
+        <fragment android:id="@+id/autocomplete_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+            />
+
 
         <TextView
             android:id="@+id/numberOfLamps"
@@ -60,6 +55,7 @@
             android:textSize="17sp" />
 
         <Button
+
             android:id="@+id/altBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
