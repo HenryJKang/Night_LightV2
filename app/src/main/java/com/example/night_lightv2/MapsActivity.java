@@ -19,11 +19,9 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 
@@ -46,21 +44,15 @@ import com.google.maps.model.EncodedPolyline;
 import com.google.maps.model.TravelMode;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback{
-    DirectionsRoute route;
-    List<LatLng> path = new ArrayList<>();
     private GoogleMap mMap;
     private int bulbSize = 35;
-    private int counter = 0;
-    int locationCounter;
-    List<DirectionsRoute> myRoutes = new ArrayList<>();
-    private int routesLen;
+    RoutesHolder routesHolder;
 
     List<Polyline> polylines = new ArrayList<>();
 
@@ -319,6 +311,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //       LatLng BCIT = new LatLng(49.200526, -123.224110);
         //mMap.addMarker(new MarkerOptions().position(BCIT).title("Marker in BCIT"));
         //addBulbToMap(49.2005265, -123.2241106);
+        mMap.clear();
     }
 
     public void zoomLocation(View v) {
@@ -364,18 +357,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void onSearch(View v) {
-        locationCounter = 0;
-        List<Address> addressList = null;
+
         EditText editTextLocation = (EditText) findViewById(R.id.editTextLocation);
-        String location = editTextLocation.getText().toString().trim();
+       String location = editTextLocation.getText().toString().trim();
         if (TextUtils.isEmpty(location)) {
             Toast.makeText(this, "You must enter a location.", Toast.LENGTH_LONG).show();
             return;
         }
 
         Geocoder geocoder = new Geocoder(this);
+        List<Address> addressList = new ArrayList<>();
         try {
-            addressList = geocoder.getFromLocationName(location, 1);
+             addressList = geocoder.getFromLocationName(location, 1);
             if (addressList.size() == 0) {
                 Toast.makeText(this, "Not applicable address.", Toast.LENGTH_LONG).show();
                 return;
@@ -383,65 +376,143 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (IOException e) {
             e.printStackTrace();
         }
-        showRoute(addressList , location);
+        routesHolder = new RoutesHolder(location , getCurrentLocation(), addressList.get(0));
+        addRouteToMap();
 
     }
-    public void altBtn(View v){
-        for(Polyline line : polylines)
-        {
-            line.remove();
-            polylines.remove(line);
-        }
-        polylines.clear();
+    public void addRouteToMap(){
         mMap.clear();
-        path.clear();
-        if (routesLen > 1) {
-
-            if (counter < routesLen-1) {
-                DirectionsRoute route = myRoutes.get(++counter);
-                Log.e("drawing ...route ",Integer.toString(counter));
-                drawPolyline(route);
-            } else {
-                counter = 0;
-                DirectionsRoute route = myRoutes.get(counter);
-                Log.e("drawing ...route ",Integer.toString(counter));
-                drawPolyline(route);
-            }
-
-        } else {
-            //TODO: make toast "no alternative route available"
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "No alternative route available",
-                    Toast.LENGTH_SHORT);
-            toast.show();
-        }
+        LatLng latLng = new LatLng(routesHolder.destination[0], routesHolder.destination[1]);
+        mMap.addMarker(new MarkerOptions().position(latLng).title(routesHolder.location));
+        drawPolyline(routesHolder.currentRoute);
+        drawBulbsOnRoute(routesHolder.latLngArrayOfCurrentRoute);
+        float zoom = 10.0f;
+        zoomLocationAnimate(getMiddleOfPath(routesHolder.origin, routesHolder.destination),
+                (getZoomFloat(routesHolder.origin, routesHolder.destination)));
 
     }
-    public void  showRoute(List<Address> addressList, String location){
-        mMap.clear();
-        Address adr = addressList.get(locationCounter);
-        LatLng latLng = new LatLng(adr.getLatitude(), adr.getLongitude());
-        mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(latLng).title(location));
-        double[] dest = {adr.getLatitude(), adr.getLongitude()};
-        //     getCurrentLocation();
-        drawRoute(getCurrentLocation(), dest);
-        //   addLights(getCurrentLocation(), dest, 0.002);
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-        showLampsOnRoute();
 
+    public LatLng getMiddleOfPath(double[] origin, double[] destination){
         //gettting path logic for zooming
-        double startX =  path.get(0).latitude;
-        double startY = path.get(1).longitude;
-        double endX = path.get(path.size()-1).latitude;
-        double endY = path.get(path.size()-1).longitude;
+        double startX =  origin[0];
+        double startY = origin[1];
+        double endX = destination[0];
+        double endY = destination[1];
         double differenceX = endX - startX;
         double differenceY = endY - startY;
         LatLng middleOfPath = new LatLng((differenceX / 2 ) + startX , (differenceY / 2) + startY );
+        return middleOfPath;
+
+    }
+    public float getZoomFloat(double[] origin, double[] destination){
+        double startX =  origin[0];
+        double startY = destination[0];
+        double endX = origin[1];
+        double endY = destination[1];
+        double differenceX = endX - startX;
+        double differenceY = endY - startY;
         int maximum = Math.max((int) ((differenceX) * 100000), (int) ((differenceY )* 100000)) ;
         float zoom = 10.0f;
         System.out.println("!@#" + maximum);
-                  zoomLocationAnimate(middleOfPath, (zoom));
+        return 10.0f;
+    }
+
+    public void drawBulbsOnRoute(List<LatLng> path){
+        HashSet<LampKey> lamplist= myAsyncTask.lamps.getLampsOnRoute(path, 3);
+        HashSet<LampValue> lampValueList = myAsyncTask.lamps.getSurroundingLamps(lamplist,3);
+        for (LampValue lamp : lampValueList ){
+            addLights(lamp,3);
+        }
+    }
+
+//    public void onAlternativePath(View v){
+//        for(Polyline line : polylines)
+//        {
+//            line.remove();
+//            polylines.remove(line);
+//        }
+//        polylines.clear();
+//        mMap.clear();
+//        path.clear();
+//        if (routesLen > 1) {
+//
+//            if (counter < routesLen-1) {
+//                DirectionsRoute route = myRoutes.get(++counter);
+//                Log.e("drawing ...route ",Integer.toString(counter));
+//                drawPolyline(route);
+//            } else {
+//                counter = 0;
+//                DirectionsRoute route = myRoutes.get(counter);
+//                Log.e("drawing ...route ",Integer.toString(counter));
+//                drawPolyline(route);
+//            }
+//
+//        } else {
+//            //TODO: make toast "no alternative route available"
+//            Toast toast = Toast.makeText(getApplicationContext(),
+//                    "No alternative route available",
+//                    Toast.LENGTH_SHORT);
+//            toast.show();
+//        }
+//
+//    }
+public void onAlternativePath(View v){
+            routesHolder.updateToNextRoute();
+            addRouteToMap();
+
+    }
+    //** oLD ONALTERNATIVE PATH
+//    public void onAlternativePath(View v){
+//
+//
+//        if (routesLen > 1) {
+//
+//            if (counter < routesLen-1) {
+//                DirectionsRoute route = myRoutes.get(++counter);
+//                Log.e("drawing ...route ",Integer.toString(counter));
+//                drawPolyline(route);
+//            } else {
+//                counter = 0;
+//                DirectionsRoute route = myRoutes.get(counter);
+//                Log.e("drawing ...route ",Integer.toString(counter));
+//                drawPolyline(route);
+//            }
+//
+//        } else {
+//            //TODO: make toast "no alternative route available"
+//            Toast toast = Toast.makeText(getApplicationContext(),
+//                    "No alternative route available",
+//                    Toast.LENGTH_SHORT);
+//            toast.show();
+//        }
+//
+//    }
+//    public void  showRoute(){
+//        mMap.clear();
+//        Address adr = addressList.get(0);
+//        LatLng latLng = new LatLng(adr.getLatitude(), adr.getLongitude());
+//        mMap.clear();
+//        mMap.addMarker(new MarkerOptions().position(latLng).title(location));
+//        double[] dest = {adr.getLatitude(), adr.getLongitude()};
+//        //     getCurrentLocation();
+//        DirectionsRoute route = getDirectionRoute(getCurrentLocation(), dest);
+//        drawPolyline();
+//        //   addLights(getCurrentLocation(), dest, 0.002);
+//        mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+//        showLampsOnRoute();
+//
+//        //gettting path logic for zooming
+//        double startX =  path.get(0).latitude;
+//        double startY = path.get(1).longitude;
+//        double endX = path.get(path.size()-1).latitude;
+//        double endY = path.get(path.size()-1).longitude;
+//        double differenceX = endX - startX;
+//        double differenceY = endY - startY;
+//        LatLng middleOfPath = new LatLng((differenceX / 2 ) + startX , (differenceY / 2) + startY );
+//        int maximum = Math.max((int) ((differenceX) * 100000), (int) ((differenceY )* 100000)) ;
+//        float zoom = 10.0f;
+//        System.out.println("!@#" + maximum);
+//                  zoomLocationAnimate(middleOfPath, (zoom));
 
        // zoomLocationAnimate(middleOfPath, (zoom *));
 
@@ -482,59 +553,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //
 //
 //        }
-
-    }
-
-
-    public void drawRoute(double[] origin, double[] destination) {
-
-        String o = origin[0] + ", " + origin[1];
-        String d = destination[0] + ", " + destination[1];
-        //Define list to get all latlng for the route
-
-
-        //Execute Directions API request
-        GeoApiContext context = new GeoApiContext.Builder()
-                .apiKey("AIzaSyDZ9Tbo5lu86ZVcCDkdBVBWLuJU_P7JuLQ")
-                .build();
-        //From YVR airport to BCIT-----------------------------
-        // DirectionsApiRequest req = DirectionsApi.getDirections(context, o, d);
-        DirectionsApiRequest req = DirectionsApi.newRequest(context).origin(o).destination(d).mode(TravelMode.WALKING).alternatives(true);
-        try {
-            DirectionsResult res = req.await();
-
-            //Loop through legs and steps to get encoded polylines of each step
-            routesLen = res.routes.length;
-
-            if (res.routes != null && routesLen > 0) {
-                Log.d("routesLen---", Integer.toString(routesLen));
-                DirectionsRoute route = res.routes[0];
-
-                for (int i = 0; i < routesLen; i++) {
-                    myRoutes.add(res.routes[i]);
-                }
-
-
-                Log.e("drawing ...route",Integer.toString(0));
-                drawPolyline(route);
-
-
-            }
-        } catch (Exception ex) {
-            Log.e("getLocalizedMessage()", ex.getLocalizedMessage());
-        }
-
-    }
-    public void showLampsOnRoute(){
-        HashSet<LampKey> lamplist= myAsyncTask.lamps.getLampsOnRoute(path, 3);
-        HashSet<LampValue> lampValueList = myAsyncTask.lamps.getSurroundingLamps(lamplist,3);
-        for (LampValue lamp : lampValueList ){
-            addLights(lamp,3);
-
-        }
-    }
+//
+//    }
+//
+//
+//    public DirectionsRoute getDirectionRoute(double[] origin, double[] destination) {
+//
+//        String o = origin[0] + ", " + origin[1];
+//        String d = destination[0] + ", " + destination[1];
+//
+//        GeoApiContext context = new GeoApiContext.Builder()
+//                .apiKey("AIzaSyDZ9Tbo5lu86ZVcCDkdBVBWLuJU_P7JuLQ")
+//                .build();
+//        // DirectionsApiRequest req = DirectionsApi.getDirections(context, o, d);
+//        DirectionsApiRequest req = DirectionsApi.newRequest(context).origin(o).destination(d).mode(TravelMode.WALKING).alternatives(true);
+//        try {
+//            DirectionsResult res = req.await();
+//            //Loop through legs and steps to get encoded polylines of each step
+//            routesLen = res.routes.length ;
+//        if (res.routes != null && routesLen > 0) {
+//            Log.d("routesLen---", Integer.toString(routesLen));
+//            route = res.routes[locationCounter%routesLen];
+//
+//            for (int i = 0; i < routesLen; i++) {
+//                myRoutes.add(res.routes[i]);
+//            }
+//            Log.e("drawing ...route",Integer.toString(0));
+//        }
+//    } catch (Exception ex) {
+//        Log.e("getLocalizedMessage()", ex.getLocalizedMessage());
+//    }
+//      return route;
+//    }
+//    public void showLampsOnRoute(){
+//        HashSet<LampKey> lamplist= myAsyncTask.lamps.getLampsOnRoute(path, 3);
+//        HashSet<LampValue> lampValueList = myAsyncTask.lamps.getSurroundingLamps(lamplist,3);
+//        for (LampValue lamp : lampValueList ){
+//            addLights(lamp,3);
+//
+//        }
+//    }
 
     public void drawPolyline(DirectionsRoute route) {
+        List<LatLng> path = new ArrayList<>();
         if (route.legs != null) {
             for (int i = 0; i < route.legs.length; i++) {
                 DirectionsLeg leg = route.legs[i];
@@ -570,15 +631,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (path.size() > 0) {
 
-            PolylineOptions opts = new PolylineOptions().addAll(path).color(Color.RED).width(5);
+            PolylineOptions opts = new PolylineOptions().addAll(path).color(Color.BLUE).width(5);
 
             polylines.add(this.mMap.addPolyline(opts));
         }
     }
 
 }
-
-
 
 
 

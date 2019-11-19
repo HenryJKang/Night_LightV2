@@ -76,6 +76,8 @@
         android:id="@+id/altBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="onAlternativePath"
+
         android:text="Alternative route" />
 
 </LinearLayout>
