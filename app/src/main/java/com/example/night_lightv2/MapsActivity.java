@@ -3,6 +3,8 @@ package com.example.night_lightv2;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+
+
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -50,6 +52,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback{
     private GoogleMap mMap;
     private int bulbSize = 35;
@@ -58,9 +61,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     List<Polyline> polylines = new ArrayList<>();
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -69,6 +72,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
 //        Button button = findViewById(R.id.altBtn);
+//
+//
 //
 //
 //        button.setOnClickListener(new View.OnClickListener() {
@@ -241,12 +246,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(marker);
     }
   //-----from henry's
-    public void onZoom(View v) {
-        if (v.getId() == R.id.btnZoomIn)
-            mMap.animateCamera(CameraUpdateFactory.zoomIn());
-        else
-            mMap.animateCamera(CameraUpdateFactory.zoomOut());
-    }
+
 
     public double[] getCurrentLocation() {
         double[] xy = new double[2];
@@ -641,7 +641,6 @@ public void onAlternativePath(View v){
             polylines.add(this.mMap.addPolyline(opts));
         }
     }
-
 }
 
 
