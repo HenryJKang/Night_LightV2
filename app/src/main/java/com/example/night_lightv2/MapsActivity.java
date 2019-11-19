@@ -457,15 +457,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public float getZoomFloat(double[] origin, double[] destination) {
         double startX = origin[0];
-        double startY = destination[0];
-        double endX = origin[1];
+        double startY = origin[1];
+        double endX = destination[0];
         double endY = destination[1];
-        double differenceX = endX - startX;
         double differenceY = endY - startY;
-        int maximum = Math.max((int) ((differenceX) * 100000), (int) ((differenceY) * 100000));
+        int  maximum =(int) Math.abs(differenceY * 10000.0);
+        System.out.println("!@# BEFORE " + maximum);
+
         float zoom = 10.0f;
-        System.out.println("!@#" + maximum);
-        return 10.0f;
+        int counter  = 0;
+        while (maximum <= 3000){
+            zoom += .2;
+            maximum += 250;
+        }
+        System.out.println("!@#" + maximum + "ZOOM" + zoom);
+        return zoom;
     }
 
     public void drawBulbsOnRoute(List<LatLng> path) {
