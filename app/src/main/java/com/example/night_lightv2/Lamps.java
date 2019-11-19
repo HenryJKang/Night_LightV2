@@ -1,13 +1,16 @@
 package com.example.night_lightv2;
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class Lamps {
     private HashMap<LampKey, HashSet<LampValue>> storage;
-
+    private double difference = 0.0001;
     public Lamps(){
         storage = new HashMap();
     }
@@ -75,17 +78,16 @@ public class Lamps {
         }
         return dubArr;
     }
-    public ArrayList<LampValue> getSurroundingLamps(double keyX, double keyY, int range) {
+    public HashSet<LampValue> getSurroundingLamps(double keyX, double keyY, int range) {
 
-        double difference = 0.0001;
         HashMap<Integer, LampKey> removeDup = new HashMap<>();
-        ArrayList<LampValue> list = new ArrayList<>();
+        HashSet<LampValue> list = new HashSet<>();
         for (int i = 0 - range; i < 1 + range; i++) {
             for(int j = 0 - range; j < 1 + range; j++) {
                 LampKey key = new LampKey(keyX + (difference * i), keyY + ( difference * j));
                 if(storage.containsKey(key)) {
                     removeDup.put(key.getPrimaryKey(), key);
-                    System.out.println(keyX + (difference * i) + " : " + keyY + (difference * j) + "\t\t" + storage.containsKey(key));
+                    //           System.out.println(keyX + (difference * i) + " : " + keyY + (difference * j) + "\t\t" + storage.containsKey(key));
 
                 }
             }
@@ -102,10 +104,33 @@ public class Lamps {
         return list;
     }
 
-    
+    public HashSet<LampValue> getSurroundingLamps(HashSet<LampKey> lampkeylist, int range) {
+        HashSet<LampValue> removeDup = new HashSet<>();
+        //for each  key in the hashsetlist
+        for (LampKey key : lampkeylist){
+            for(int i = 0 - range; i <  range; i++) {
+                for (int j = 0 - range; j < range; j++) {
+
+                    //create ranged Key
+                    LampKey rangedKey = new LampKey(key.getX() + (difference * i), key.getY() + (difference * j));
+                    //if the key exists within the storage aka it's in the data set
+                    if (storage.containsKey(rangedKey)) {
+                        //for each lampvalue within the storage key
+                        for (LampValue value : storage.get(rangedKey)) {
+                            removeDup.add(value);
+                        }
+                    }
+                }
+
+            }
+        }
+        return removeDup;
+
+    }
+
     public String print() {
         String s = "";
-    int counter = 0;
+        int counter = 0;
         for (Map.Entry<LampKey, HashSet<LampValue>> entry : storage.entrySet()) {
             s += "KEY \tX:" + entry.getKey().getX() + "\t Y: " + entry.getKey().getY()+ "\n";
             for(LampValue lampVal : entry.getValue()){
@@ -116,5 +141,66 @@ public class Lamps {
         }
         return s;
     }
+    public HashSet<LampKey> getLampsOnRoute(List<LatLng> path, int range) {
+        HashSet<LampKey> list = new HashSet<>();
+        System.out.println("129");
+
+        for (int i = 0; i < path.size() -  1; i++){
+            LampKey key = new LampKey(path.get(i).latitude, path.get(i).longitude);
+            LampKey key1 = new LampKey(path.get(i + 1).latitude, path.get(i + 1).longitude);
+            list.add(key);
+            list.add(key1);
+            if(notWithinRange(path.get(i), path.get(i + 1), range)){
+                System.out.println("130");
+                list = getInBetweenTwoPath(path.get(i), path.get(i + 1), range, list);
+            }
+        }
+
+        return list;
+    }
+    public boolean notWithinRange(LatLng one, LatLng two, int range){
+        System.out.println("139\t one X: "+ one.latitude + "Y:" + one.longitude);
+        System.out.println("\t two X: "+ two.latitude + "Y:" + two.longitude);
+        System.out.println("\t" + Math.abs(Math.abs(one.latitude) - Math.abs(two.latitude) + (difference * range)));
+        System.out.println("\tisitevertrue" + ( (Math.abs(Math.abs(one.latitude) - Math.abs(two.latitude))) > (difference * range * 2)) );
+        return ( ( (Math.abs(Math.abs(one.latitude) - Math.abs(two.latitude))) > (difference * range * 2)) ||
+                ( (Math.abs(Math.abs(one.longitude) - Math.abs(two.longitude))) > (difference * range * 2)));
+    }
+    public HashSet<LampKey> getInBetweenTwoPath(LatLng one, LatLng two, int range, HashSet<LampKey> list){
+        double diffX = two.latitude - one.latitude;
+        double diffY = two.longitude - one.longitude;
+        System.out.println("151: diffX" + diffX + "diffY " + diffY + " " +( Math.abs(diffX) > Math.abs(diffY)));
+        double offset = .8;
+        if (Math.abs(diffX) > Math.abs(diffY)){
+            System.out.println("");
+            double multiple =Math.abs( (diffX / ( range * difference)));
+            diffX = diffX / multiple;
+            diffY = diffY / multiple;
+            System.out.println("153: diffX" + diffX + "diffY " + diffY + "multiple" + multiple);
+
+            for(int i = 1; i <= multiple; i++ ){
+                LampKey key = new LampKey(one.latitude + (diffX * range  * i ), one.longitude + (diffY * i  * range * offset));
+                System.out.println("key 153");
+                list.add(key);
+            }
+        } else{
+            double multiple = Math.abs( (diffY / ( range * difference)));
+            diffX = diffX / multiple;
+            diffY = diffY / multiple;
+            System.out.println("163: diffX" + diffX + "diffY " + diffY + "multiple" + multiple);
+
+            for(int i = 1; i <= (int) Math.abs(multiple); i++ ){
+                LampKey key = new LampKey(one.latitude + (diffX * range * i), one.longitude + (diffY *  i *  range * offset));
+                list.add(key);
+            }
+
+        }
+
+        return list;
+    }
+    public HashMap<LampKey, HashSet<LampValue>> getStorage(){
+        return storage;
+    }
+
 
 }
