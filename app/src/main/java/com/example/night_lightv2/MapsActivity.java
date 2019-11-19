@@ -3,6 +3,8 @@ package com.example.night_lightv2;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+
+
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -51,6 +53,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback{
     DirectionsRoute route;
     List<LatLng> path = new ArrayList<>();
@@ -62,8 +65,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     List<Polyline> polylines = new ArrayList<>();
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -72,6 +77,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         Button button = findViewById(R.id.altBtn);
+
+
 
 
         button.setOnClickListener(new View.OnClickListener() {
@@ -482,7 +489,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         showLampsOnRoute();
     }
-
 }
 
 
