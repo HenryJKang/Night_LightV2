@@ -9,15 +9,19 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 public class SOS extends AppCompatActivity {
-
+    MapsActivity maps;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sos);
+        maps = new MapsActivity();
 
         (findViewById(R.id.sosCall)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -29,21 +33,23 @@ public class SOS extends AppCompatActivity {
             }
         });
 
+
         (findViewById(R.id.sosSend)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String phone ="";
 
-//                LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                String googleurl =  "https://www.google.com/maps/dir/?api=1&origin=&destination=";
+                googleurl += maps.getCurrentLocation()[0];
+                googleurl +=",";
+                googleurl += maps.getCurrentLocation()[1];
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("sms:" + phone ));
+                intent.putExtra("sms_body", googleurl);
+                startActivity(intent);
+                }
 
-                //---insert here
 
-//                Location myLocation = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-                // double longitude = myLocation.getLongitude();
-                // double latitude = myLocation.getLatitude();
 
-//String message = "http://maps.google.com/?q=" + {latitude} + "," + {longitude}
-
-            }
         });
 
 
