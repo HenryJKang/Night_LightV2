@@ -253,12 +253,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(marker);
     }
   //-----from henry's
-    public void onZoom(View v) {
-        if (v.getId() == R.id.btnZoomIn)
-            mMap.animateCamera(CameraUpdateFactory.zoomIn());
-        else
-            mMap.animateCamera(CameraUpdateFactory.zoomOut());
-    }
+
 
     public double[] getCurrentLocation() {
         double[] xy = new double[2];
