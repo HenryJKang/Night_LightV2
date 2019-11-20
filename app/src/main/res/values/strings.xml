@@ -9,5 +9,7 @@
     <string name="current_location">Current Location</string>
     <string name="find_a_path">Find a path</string>
     <string name="sos">SOS</string>
+    <string name="center">Re-center</string>
+
 
 </resources>

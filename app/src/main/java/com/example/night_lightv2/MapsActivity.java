@@ -133,6 +133,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
+        autocompleteFragment.setHint("Type your address");
+
         autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ADDRESS, Place.Field.NAME));
 
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
@@ -184,21 +186,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void zoomCurrentLocation(View v){
         double x = getCurrentLocation()[0];
         double y = getCurrentLocation()[1];
-        addCurrentLocationToMap(x,y);
-        mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(x,y) , 14.0f) );
+        mMap.animateCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(x,y) , 14.0f) );
+
     }
 
 
     void showCurrentLocation() {
-        //pre setting icon size
-        int width = 50;
-        int height = 50;
+
         int rangeAroundCurrentLocation = 200;
 
         //getting Current location
         double[] currentLocation = getCurrentLocation();
         addLights(currentLocation, rangeAroundCurrentLocation);
 
+        addWhereYouAre(currentLocation);
+        //zooming
+        zoomLocation(currentLocation, 14.0f);
+
+    }
+    void addWhereYouAre(double[] currentLocation){
+        //pre setting icon size
+        int width = 50;
+        int height = 50;
         //adding marker
         BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.curloc);
         Bitmap b = bitmapdraw.getBitmap();
@@ -207,9 +216,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         MarkerOptions marker = new MarkerOptions().position(loc).title("Your Location:" + " x: " + currentLocation[0] + " y: " + currentLocation[1]);
         marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
         mMap.addMarker(marker);
-        //zooming
-        zoomLocation(currentLocation, 14.0f);
-
     }
 
     public void addLights(double[] currloc, int range) {
@@ -396,6 +402,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         zoomLocationAnimate(getMiddleOfPath(routesHolder.origin, routesHolder.destination),
                 (getZoomFloat(routesHolder.origin, routesHolder.destination)));
         noOfLamps.setText("" + routesHolder.noOfLampsInCurrentRoute);
+        addWhereYouAre(routesHolder.origin);
     }
 
     public LatLng getMiddleOfPath(double[] origin, double[] destination) {
