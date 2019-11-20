@@ -11,17 +11,34 @@
         android:orientation="horizontal">
 
 
-        <fragment android:id="@+id/autocomplete_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
+        <fragment
+            android:id="@+id/autocomplete_fragment"
             android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
-            />
+            android:layout_width="278dp"
+            android:layout_height="50dp"
+            android:layout_weight="1" />
 
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="69dp"
+
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:fontFamily="@font/alegreya_sc_bold"
+            android:gravity="center_vertical"
+            android:text="Lamps:"
+            android:textAlignment="center" />
 
         <TextView
             android:id="@+id/numberOfLamps"
             android:layout_width="62dp"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:fontFamily="@font/alegreya_sc_bold"
+            android:gravity="center_vertical"
+            android:textAlignment="center"
+            android:textSize="24sp">
 
         </TextView>
 
@@ -44,27 +61,30 @@
 
         <Button
             android:id="@+id/currentZoom"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
+            android:layout_weight="1"
             android:background="@drawable/mybutton"
             android:fontFamily="@font/alegreya_sc_bold"
             android:onClick="zoomCurrentLocation"
-            android:shadowColor="#E1FFFFFF"
-            android:text="@string/current_location"
+            android:shadowColor="#E1000000"
+            android:text="@string/center"
+            android:textColor="#070606"
             android:textSize="17sp" />
 
         <Button
 
             android:id="@+id/altBtn"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
+            android:layout_weight="1"
             android:background="@drawable/mybutton"
             android:fontFamily="@font/alegreya_sc_bold"
-            android:shadowColor="#E1FFFFFF"
-            android:text="Alternative route"
             android:onClick="onAlternativePath"
+            android:shadowColor="#E1000000"
+            android:text="Alternative route"
             android:textColor="#111010"
             android:textSize="17sp" />
 
