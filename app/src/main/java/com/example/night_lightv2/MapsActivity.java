@@ -251,25 +251,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    //    public void addLights(double[] source, double[] dest, double range){
-//        for (int i = 0; i < myAsyncTask.coordinatesArr.size(); i++) {
-//            //   for (int i = 0; i < 111; i++) {
-//
-//            if (null != myAsyncTask.coordinatesArr.get(i) && (i % 1) == 0) {
-//                //  myAsyncTask.coordinatesArr.get(counter+2)[1] != null ||  myAsyncTask.coordinatesArr.get(counter+2)[0] != null){
-//
-//                //addBulbToMap( myAsyncTask.coordinatesArr.get(i)[1], myAsyncTask.coordinatesArr.get(i)[0]);
-//
-//                if (checkRange(Math.min(source[0], dest[0]) - range, Math.max(source[0], dest[0]) + range ,Math.min(source[1], dest[1]) - range , Math.max(source[1], dest[1]) + range,
-//                        myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1])){
-//
-//                    addBulbToMap(myAsyncTask.coordinatesArr.get(i)[0], myAsyncTask.coordinatesArr.get(i)[1]);
-//                }
-//            }
-//
-//        }
-//
-//    }
+
     public void addBulbToMap(double x, double y) {
         LatLng loc = new LatLng(x, y);
         int height = bulbSize;
@@ -285,13 +267,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //----------
     public void addCurrentLocationToMap(double x, double y) {
         LatLng loc = new LatLng(x, y);
-        //int height = bulbSize;
-        //int width = bulbSize;
-        //BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.bulb);
-        //Bitmap b = bitmapdraw.getBitmap();
-        //Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
+
         MarkerOptions marker = new MarkerOptions().position(loc).title("marker: " + x + " : " + y);
-        //marker.icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
+
         mMap.addMarker(marker);
     }
 
@@ -358,9 +336,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         addBulbToMap(49.20052, -123.170110);
         addBulbToMap(49.20054, -123.170110);
 
-        //       LatLng BCIT = new LatLng(49.200526, -123.224110);
-        //mMap.addMarker(new MarkerOptions().position(BCIT).title("Marker in BCIT"));
-        //addBulbToMap(49.2005265, -123.2241106);
         mMap.clear();
     }
 
@@ -463,37 +438,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    //    public void onAlternativePath(View v){
-//        for(Polyline line : polylines)
-//        {
-//            line.remove();
-//            polylines.remove(line);
-//        }
-//        polylines.clear();
-//        mMap.clear();
-//        path.clear();
-//        if (routesLen > 1) {
-//
-//            if (counter < routesLen-1) {
-//                DirectionsRoute route = myRoutes.get(++counter);
-//                Log.e("drawing ...route ",Integer.toString(counter));
-//                drawPolyline(route);
-//            } else {
-//                counter = 0;
-//                DirectionsRoute route = myRoutes.get(counter);
-//                Log.e("drawing ...route ",Integer.toString(counter));
-//                drawPolyline(route);
-//            }
-//
-//        } else {
-//            //TODO: make toast "no alternative route available"
-//            Toast toast = Toast.makeText(getApplicationContext(),
-//                    "No alternative route available",
-//                    Toast.LENGTH_SHORT);
-//            toast.show();
-//        }
-//
-//    }
+
     public void onAlternativePath(View v) {
         if (routesHolder == null || routesHolder.noOfDiffRoutes < 1 ){
             Toast toast = Toast.makeText(getApplicationContext(),
@@ -506,138 +451,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         addRouteToMap();
 
     }
-    //** oLD ONALTERNATIVE PATH
-//    public void onAlternativePath(View v){
-//
-//
-//        if (routesLen > 1) {
-//
-//            if (counter < routesLen-1) {
-//                DirectionsRoute route = myRoutes.get(++counter);
-//                Log.e("drawing ...route ",Integer.toString(counter));
-//                drawPolyline(route);
-//            } else {
-//                counter = 0;
-//                DirectionsRoute route = myRoutes.get(counter);
-//                Log.e("drawing ...route ",Integer.toString(counter));
-//                drawPolyline(route);
-//            }
-//
-//        } else {
-//            //TODO: make toast "no alternative route available"
-//            Toast toast = Toast.makeText(getApplicationContext(),
-//                    "No alternative route available",
-//                    Toast.LENGTH_SHORT);
-//            toast.show();
-//        }
-//
-//    }
-//    public void  showRoute(){
-//        mMap.clear();
-//        Address adr = addressList.get(0);
-//        LatLng latLng = new LatLng(adr.getLatitude(), adr.getLongitude());
-//        mMap.clear();
-//        mMap.addMarker(new MarkerOptions().position(latLng).title(location));
-//        double[] dest = {adr.getLatitude(), adr.getLongitude()};
-//        //     getCurrentLocation();
-//        DirectionsRoute route = getDirectionRoute(getCurrentLocation(), dest);
-//        drawPolyline();
-//        //   addLights(getCurrentLocation(), dest, 0.002);
-//        mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-//        showLampsOnRoute();
-//
-//        //gettting path logic for zooming
-//        double startX =  path.get(0).latitude;
-//        double startY = path.get(1).longitude;
-//        double endX = path.get(path.size()-1).latitude;
-//        double endY = path.get(path.size()-1).longitude;
-//        double differenceX = endX - startX;
-//        double differenceY = endY - startY;
-//        LatLng middleOfPath = new LatLng((differenceX / 2 ) + startX , (differenceY / 2) + startY );
-//        int maximum = Math.max((int) ((differenceX) * 100000), (int) ((differenceY )* 100000)) ;
-//        float zoom = 10.0f;
-//        System.out.println("!@#" + maximum);
-//                  zoomLocationAnimate(middleOfPath, (zoom));
-
-    // zoomLocationAnimate(middleOfPath, (zoom *));
-
-//        if (maximum >= 3000){
-//            zoomLocationAnimate(middleOfPath, (zoom * (float)(2)));
-//            System.out.println("dafs414" + maximum);
-//
-//        }else if (3000 > maximum && maximum >= 2500){
-//            zoomLocationAnimate(middleOfPath, (zoom * (float)(2.5)));
-//
-//System.out.println("419");
-//        }
-//        else if (2000 > maximum && maximum >= 1800){
-//            zoomLocationAnimate(middleOfPath, (zoom * (float)(3)));
-//            System.out.println("dafs422");
-//
-//
-//        } else if (1800 > maximum && maximum >= 1600){
-//            zoomLocationAnimate(middleOfPath, (zoom * (float)(3.5)));
-//
-//            System.out.println("dafs428");
-//
-//        }
-//        else if (1600 > maximum && maximum >= 1400){
-//            zoomLocationAnimate(middleOfPath, (zoom * (float)(3.5)));
-//
-//            System.out.println("dafs434");
-//
-//        }
-//        else if (1400 > maximum && maximum >= 1000){
-//            zoomLocationAnimate(middleOfPath, zoom * 4);
-//
-//            System.out.println("dafs440");
-//
-//        } else {
-//            zoomLocationAnimate(middleOfPath, zoom * (float)4.5);
-//            System.out.println("dafs445");
-//
-//
-//        }
-//
-//    }
-//
-//
-//    public DirectionsRoute getDirectionRoute(double[] origin, double[] destination) {
-//
-//        String o = origin[0] + ", " + origin[1];
-//        String d = destination[0] + ", " + destination[1];
-//
-//        GeoApiContext context = new GeoApiContext.Builder()
-//                .apiKey("AIzaSyDZ9Tbo5lu86ZVcCDkdBVBWLuJU_P7JuLQ")
-//                .build();
-//        // DirectionsApiRequest req = DirectionsApi.getDirections(context, o, d);
-//        DirectionsApiRequest req = DirectionsApi.newRequest(context).origin(o).destination(d).mode(TravelMode.WALKING).alternatives(true);
-//        try {
-//            DirectionsResult res = req.await();
-//            //Loop through legs and steps to get encoded polylines of each step
-//            routesLen = res.routes.length ;
-//        if (res.routes != null && routesLen > 0) {
-//            Log.d("routesLen---", Integer.toString(routesLen));
-//            route = res.routes[locationCounter%routesLen];
-//
-//            for (int i = 0; i < routesLen; i++) {
-//                myRoutes.add(res.routes[i]);
-//            }
-//            Log.e("drawing ...route",Integer.toString(0));
-//        }
-//    } catch (Exception ex) {
-//        Log.e("getLocalizedMessage()", ex.getLocalizedMessage());
-//    }
-//      return route;
-//    }
-//    public void showLampsOnRoute(){
-//        HashSet<LampKey> lamplist= myAsyncTask.lamps.getLampsOnRoute(path, 3);
-//        HashSet<LampValue> lampValueList = myAsyncTask.lamps.getSurroundingLamps(lamplist,3);
-//        for (LampValue lamp : lampValueList ){
-//            addLights(lamp,3);
-//
-//        }
-//    }
 
     public void drawPolyline(DirectionsRoute route) {
         List<LatLng> path = new ArrayList<>();
