@@ -92,44 +92,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-//        Button button = findViewById(R.id.altBtn);
-//
-//
-//        button.setOnClickListener(new View.OnClickListener() {
-//
-//            public void onClick(View v) {
-//                for(Polyline line : polylines)
-//                {
-//                    line.remove();
-//                    polylines.remove(line);
-//                }
-//                polylines.clear();
-//                mMap.clear();
-//                path.clear();
-//                if (routesLen > 1) {
-//
-//                    if (counter < routesLen-1) {
-//                        DirectionsRoute route = myRoutes.get(++counter);
-//                        Log.e("drawing ...route ",Integer.toString(counter));
-//                        drawPolyline(route);
-//                    } else {
-//                        counter = 0;
-//                        DirectionsRoute route = myRoutes.get(counter);
-//                        Log.e("drawing ...route ",Integer.toString(counter));
-//                        drawPolyline(route);
-//                    }
-//
-//                } else {
-//                    //TODO: make toast "no alternative route available"
-//                    Toast toast = Toast.makeText(getApplicationContext(),
-//                            "No alternative route available",
-//                            Toast.LENGTH_SHORT);
-//                    toast.show();
-//                }
-//            }
-//        });
 
-//    }
 
 
     /**
@@ -170,21 +133,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ADDRESS, Place.Field.NAME));
 
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
 // TODO: Get info about the selected place.
-                Log.i("Places--", "Place: " + place.getName() + ", " + place.getId());
+                Log.i("Places--", "Place: " + place.getName() + ", " + place.getAddress());
                 List<Address> addressList = null;
                 String location = place.getName();
+                String locationAdd = place.getAddress();
                 try {
-                    addressList = geocoder.getFromLocationName(location, 1);
+//                    addressList = geocoder.getFromLocationName(location, 1);
+                    addressList = geocoder.getFromLocationName(locationAdd, 1);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                Address adr = addressList.get(0);
+                Address adr;
+
+                if ( addressList.size() == 0 ||addressList.get(0) == null){
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            "Location can not be retrieved",
+                            Toast.LENGTH_SHORT);
+                    toast.show();
+                    return;
+                } else{
+                    adr  = addressList.get(0);
+                }
 
                 LatLng latLng = new LatLng(adr.getLatitude(), adr.getLongitude());
 
@@ -204,9 +179,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.i("Places Err--", "An error occurred: " + status);
             }
         });
-
-
     }
+
+    public void zoomCurrentLocation(View v){
+        double x = getCurrentLocation()[0];
+        double y = getCurrentLocation()[1];
+        addCurrentLocationToMap(x,y);
+        mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(x,y) , 14.0f) );
+    }
+
 
     void showCurrentLocation() {
         //pre setting icon size
@@ -514,6 +495,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //
 //    }
     public void onAlternativePath(View v) {
+        if (routesHolder == null || routesHolder.noOfDiffRoutes < 1 ){
+            Toast toast = Toast.makeText(getApplicationContext(),
+                    "No alternative route available",
+            Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
         routesHolder.updateToNextRoute();
         addRouteToMap();
 
