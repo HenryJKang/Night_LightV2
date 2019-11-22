@@ -39,7 +39,7 @@
             android:fontFamily="@font/alegreya_sc_bold"
             android:gravity="center_vertical"
             android:textAlignment="center"
-            android:textSize="24sp">
+            android:textSize="14dp">
 
         </TextView>
 

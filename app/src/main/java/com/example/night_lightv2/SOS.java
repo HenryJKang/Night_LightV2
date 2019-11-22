@@ -63,43 +63,49 @@ public class SOS extends AppCompatActivity {
     }
     public double[] getCurrentLocation() {
         double[] xy = new double[2];
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
-        String locationProvider = LocationManager.NETWORK_PROVIDER;
+        try {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
-        if (checkLocationPermission()) {
+            String locationProvider = LocationManager.NETWORK_PROVIDER;
 
-            Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
-            //     System.out.println("Latitude ~~~~~~~ "+lastKnownLocation.getLatitude());
-            xy[0] = lastKnownLocation.getLatitude();
-            xy[1] = lastKnownLocation.getLongitude();
-            //  System.out.println(       "Longitidue ~~~~~~~~~~" + lastKnownLocation.getLongitude());
-        } else {
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "Location not given permissions Please go to your settings and allow enable location sharing",
-                    Toast.LENGTH_SHORT);
-            toast.show();
+            if (checkLocationPermission()) {
+
+                Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
+                //     System.out.println("Latitude ~~~~~~~ "+lastKnownLocation.getLatitude());
+                xy[0] = lastKnownLocation.getLatitude();
+                xy[1] = lastKnownLocation.getLongitude();
+                //  System.out.println(       "Longitidue ~~~~~~~~~~" + lastKnownLocation.getLongitude());
+            } else {
+                Toast toast = Toast.makeText(getApplicationContext(),
+                        "Location not given permissions Please go to your settings and allow enable location sharing",
+                        Toast.LENGTH_SHORT);
+                toast.show();
+            }
+            LocationListener locationListener = new LocationListener() {
+                public void onLocationChanged(Location location) {
+                    // Called when a new location is found by the network location provider.
+                    Log.d("new location lat ", Double.toString(location.getLatitude()));
+                    Log.d("new location long ", Double.toString(location.getLongitude()));
+
+                }
+
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+                }
+
+                public void onProviderEnabled(String provider) {
+                }
+
+                public void onProviderDisabled(String provider) {
+                }
+            };
+
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        } catch(Exception e){
+            xy[0] =49.25011;
+            xy[1] = -123.00427;
         }
-        LocationListener locationListener = new LocationListener() {
-            public void onLocationChanged(Location location) {
-                // Called when a new location is found by the network location provider.
-                Log.d("new location lat ", Double.toString(location.getLatitude()));
-                Log.d("new location long ", Double.toString(location.getLongitude()));
-
-            }
-
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
-
-            public void onProviderEnabled(String provider) {
-            }
-
-            public void onProviderDisabled(String provider) {
-            }
-        };
-
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         return xy;
     }
 

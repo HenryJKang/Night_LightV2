@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Night_LightV2</string>
+    <string name="app_name">Night Light</string>
     <string name="title_activity_maps">Map</string>
     <string name="search">Search</string>
     <string name="mapType">Toggle Type</string>

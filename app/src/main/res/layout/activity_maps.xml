@@ -39,7 +39,7 @@
             android:fontFamily="@font/alegreya_sc_bold"
             android:gravity="center_vertical"
             android:textAlignment="center"
-            android:textSize="24sp">
+            android:textSize="14dp">
 
         </TextView>
 
@@ -72,7 +72,7 @@
             android:shadowColor="#E1000000"
             android:text="@string/center"
             android:textColor="#070606"
-            android:textSize="17sp" />
+            android:textSize="14sp" />
 
         <Button
 
@@ -87,7 +87,7 @@
             android:shadowColor="#E1000000"
             android:text="Alternative route"
             android:textColor="#111010"
-            android:textSize="17sp" />
+            android:textSize="14sp" />
 
 
     </LinearLayout>
